@@ -137,3 +137,6 @@ data/*
 
 # save files
 save/*
+
+.DS_Store
+setup.cfg
