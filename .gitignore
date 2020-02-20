@@ -138,5 +138,8 @@ data/*
 # save files
 save/*
 
+# vscode settings
+.vscode/*
+
 .DS_Store
 setup.cfg
