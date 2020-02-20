@@ -40,6 +40,7 @@ else:
         batch_norm=True if args.n == 1 else False) for i in range(L)]
     encoder.append(models.Flatten([1, 2, 3]))
     encoder.append(models.MLP([lat, 2]))
+    encoder.append(models.STLayer())
     encoder = torch.nn.Sequential(*encoder).to(device)
 
 decoder = models.MLP([5]+[args.hid]*args.d+[3]).to(device)
