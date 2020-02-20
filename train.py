@@ -2,6 +2,7 @@ import torch
 import models
 import data
 import argparse
+import os
 
 parser = argparse.ArgumentParser("train an encoder for effect prediction")
 parser.add_argument("-lr", help="learning rate. default 1e-3", default=1e-4, type=float)
@@ -13,6 +14,7 @@ parser.add_argument("-d", help="depth of networks. default 2.", default=2, type=
 parser.add_argument("-cnn", help="MLP (0) or CNN (1). default 0.", default=0, type=int)
 parser.add_argument("-f", help="filters if CNN is used.", nargs="+", type=int)
 parser.add_argument("-n", help="batch norm. default 0.", default=0, type=int)
+parser.add_argument("-ckpt", help="load from checkpoint.", type=str)
 args = parser.parse_args()
 
 device = torch.device(args.dv)
@@ -44,6 +46,9 @@ else:
     encoder = torch.nn.Sequential(*encoder).to(device)
 
 decoder = models.MLP([5]+[args.hid]*args.d+[3]).to(device)
+if args.ckpt is not None:
+    encoder.load_state_dict(torch.load(os.path.join(args.ckpt, "encoder.ckpt")))
+    decoder.load_state_dict(torch.load(os.path.join(args.ckpt, "decoder.ckpt")))
 
 print("="*10+"ENCODER"+"="*10)
 print(encoder)
@@ -60,10 +65,9 @@ optimizer = torch.optim.Adam(
     ]
 )
 criterion = torch.nn.MSELoss(reduction="sum")
-
+avg_loss = 0.0
+it = 0
 for e in range(args.e):
-    avg_loss = 0.0
-    it = 0
     for i, sample in enumerate(loader):
         optimizer.zero_grad()
         st = sample["object"].to(device)
@@ -82,7 +86,7 @@ for e in range(args.e):
         it += 1
 
     if (e+1) % 100 == 0:
-        print("it: %d, loss: %.4f" % ((e+1)*it, avg_loss/it))
+        print("it: %d, loss: %.4f" % (it, avg_loss/it))
 
 sample = iter(load_all).next()
 with torch.no_grad():

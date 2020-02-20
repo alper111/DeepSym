@@ -2,6 +2,7 @@ import torch
 import models
 import data
 import argparse
+import os
 import matplotlib.pyplot as plt
 
 parser = argparse.ArgumentParser("test encoded model.")
@@ -11,6 +12,7 @@ parser.add_argument("-d", help="depth of networks. default 2.", default=2, type=
 parser.add_argument("-cnn", help="MLP (0) or CNN (1). default 0.", default=0, type=int)
 parser.add_argument("-f", help="filters if CNN is used.", nargs="+", type=int)
 parser.add_argument("-n", help="batch norm. default 0.", default=0, type=int)
+parser.add_argument("-ckpt", help="checkpoint folder path.", type=str)
 args = parser.parse_args()
 
 device = torch.device(args.dv)
@@ -18,7 +20,7 @@ device = torch.device(args.dv)
 trainset = data.FirstLevelDataset()
 loader = torch.utils.data.DataLoader(trainset, batch_size=150)
 sample = iter(loader).next()
-codes = torch.load("save/codes_first.torch")
+codes = torch.load(os.path.join(args.ckpt, "codes_first.torch"))
 
 if args.cnn == 0:
     encoder = torch.nn.Sequential(
@@ -42,7 +44,7 @@ else:
     encoder.append(models.STLayer())
     encoder = torch.nn.Sequential(*encoder).to(device)
 
-encoder.load_state_dict(torch.load("save/encoder.ckpt"))
+encoder.load_state_dict(torch.load(os.path.join(args.ckpt, "encoder.ckpt")))
 
 fig, ax = plt.subplots(5, 10, figsize=(18, 10))
 unnormalized = (sample["object"].reshape(-1, 128*128) * (trainset.obj_std + 1e-6) + trainset.obj_mu)
