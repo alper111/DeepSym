@@ -60,7 +60,7 @@ class Linear(torch.nn.Module):
 
 class MLP(torch.nn.Module):
     '''multi-layer perceptron with batch norm option'''
-    def __init__(self, layer_info, activation, std=None, normalization=None):
+    def __init__(self, layer_info, activation=torch.nn.ReLU(), std=None, normalization=None):
         super(MLP, self).__init__()
         layers = []
         in_dim = layer_info[0]
