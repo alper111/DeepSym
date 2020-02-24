@@ -5,12 +5,13 @@ import argparse
 import os
 
 parser = argparse.ArgumentParser("train an encoder for effect prediction")
-parser.add_argument("-lr", help="learning rate. default 1e-3", default=1e-4, type=float)
+parser.add_argument("-lr", help="learning rate. default 1e-3", default=1e-3, type=float)
 parser.add_argument("-bs", help="batch size. default 10", default=10, type=int)
 parser.add_argument("-e", help="epoch. default 1000.", default=1000, type=int)
 parser.add_argument("-dv", help="device. default cpu.", default="cpu", type=str)
 parser.add_argument("-hid", help="hidden size. default 128.", default=128, type=int)
 parser.add_argument("-d", help="depth of networks. default 2.", default=2, type=int)
+parser.add_argument("-cd", help="code dimension. default 2.", default=2, type=int)
 parser.add_argument("-cnn", help="MLP (0) or CNN (1). default 0.", default=0, type=int)
 parser.add_argument("-f", help="filters if CNN is used.", nargs="+", type=int)
 parser.add_argument("-n", help="batch norm. default 0.", default=0, type=int)
@@ -21,12 +22,11 @@ device = torch.device(args.dv)
 
 trainset = data.FirstLevelDataset()
 loader = torch.utils.data.DataLoader(trainset, batch_size=args.bs)
-load_all = torch.utils.data.DataLoader(trainset, batch_size=150)
 
 if args.cnn == 0:
     encoder = torch.nn.Sequential(
-        models.Flatten([2, 3]),
-        models.MLP([128*128]+[args.hid]*args.d+[2], normalization="batch_norm" if args.n == 1 else None),
+        models.Flatten([1, 2, 3]),
+        models.MLP([128*128]+[args.hid]*args.d+[args.cd], normalization="batch_norm" if args.n == 1 else None),
         models.STLayer()
     ).to(device)
 else:
@@ -41,14 +41,14 @@ else:
         padding=1,
         batch_norm=True if args.n == 1 else False) for i in range(L)]
     encoder.append(models.Flatten([1, 2, 3]))
-    encoder.append(models.MLP([lat, 2]))
+    encoder.append(models.MLP([lat, args.cd]))
     encoder.append(models.STLayer())
     encoder = torch.nn.Sequential(*encoder).to(device)
 
-decoder = models.MLP([5]+[args.hid]*args.d+[3]).to(device)
+decoder = models.MLP([args.cd + 3] + [args.hid] * args.d + [3]).to(device)
 if args.ckpt is not None:
-    encoder.load_state_dict(torch.load(os.path.join(args.ckpt, "encoder.ckpt")))
-    decoder.load_state_dict(torch.load(os.path.join(args.ckpt, "decoder.ckpt")))
+    encoder.load_state_dict(torch.load(os.path.join(args.ckpt, "encoder_first.ckpt")))
+    decoder.load_state_dict(torch.load(os.path.join(args.ckpt, "decoder_first.ckpt")))
 
 print("="*10+"ENCODER"+"="*10)
 print(encoder)
@@ -88,9 +88,8 @@ for e in range(args.e):
     if (e+1) % 100 == 0:
         print("it: %d, loss: %.4f" % (it, avg_loss/it))
 
-sample = iter(load_all).next()
 with torch.no_grad():
-    codes = encoder(sample["object"].to(device)).cpu()
+    codes = encoder(trainset.objects.to(device)).cpu()
 torch.save(codes, "save/codes_first.torch")
-torch.save(encoder.eval().cpu().state_dict(), "save/encoder.ckpt")
-torch.save(decoder.eval().cpu().state_dict(), "save/decoder.ckpt")
+torch.save(encoder.eval().cpu().state_dict(), "save/encoder_first.ckpt")
+torch.save(decoder.eval().cpu().state_dict(), "save/decoder_first.ckpt")
