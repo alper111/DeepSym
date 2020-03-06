@@ -89,6 +89,7 @@ for e in range(args.e):
         print("it: %d, loss: %.4f" % (it, avg_loss/it))
 
 with torch.no_grad():
+    encoder.eval()
     codes = encoder(trainset.objects.to(device)).cpu()
 torch.save(codes, "save/codes_first.torch")
 torch.save(encoder.eval().cpu().state_dict(), "save/encoder_first.ckpt")
