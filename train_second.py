@@ -22,7 +22,7 @@ device = torch.device(args.dv)
 
 trainset = data.SecondLevelDataset()
 loader = torch.utils.data.DataLoader(trainset, batch_size=args.bs)
-load_all = torch.utils.data.DataLoader(trainset, batch_size=2500)
+load_all = torch.utils.data.DataLoader(trainset, batch_size=2500, shuffle=False)
 
 if args.cnn == 0:
     encoder = torch.nn.Sequential(
@@ -92,5 +92,6 @@ sample = iter(load_all).next()
 with torch.no_grad():
     codes = encoder(sample["object"].to(device)).cpu()
 torch.save(codes, "save/codes_second.torch")
+torch.save(sample["code"], "save/objcodes_second.torch")
 torch.save(encoder.eval().cpu().state_dict(), "save/encoder_second.ckpt")
 torch.save(decoder.eval().cpu().state_dict(), "save/decoder_second.ckpt")

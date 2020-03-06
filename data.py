@@ -43,7 +43,7 @@ class SecondLevelDataset(torch.utils.data.Dataset):
         self.obj_names = np.load("data/obj_names.npy")
 
         self.objects = torch.load("data/object_depths.torch")
-        self.codes = torch.load("data/codes_first.torch")
+        self.codes = torch.load("save/codes_first.torch")
         self.relations = torch.load("data/relations.torch")
         self.effects = torch.load("data/effects_2.torch")
 
