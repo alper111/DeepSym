@@ -1,4 +1,6 @@
 import torch
+import numpy as np
+from sklearn.tree import _tree
 
 
 def kmeans(x, k, centroids=None, max_iter=None, epsilon=0.01):
@@ -47,3 +49,36 @@ def kmeans(x, k, centroids=None, max_iter=None, epsilon=0.01):
             break
 
     return centroids, next_assigns, prev_mse, it
+
+
+def tree_to_code(tree, feature_names):
+    tree_ = tree.tree_
+    feature_name = [
+        feature_names[i] if i != _tree.TREE_UNDEFINED else "undefined!"
+        for i in tree_.feature
+    ]
+
+    def recurse(node, rules):
+        if tree_.feature[node] != _tree.TREE_UNDEFINED:
+            name = feature_name[node]
+            left = rules.copy()
+            right = rules.copy()
+            left.append("(not (%s))" % name)
+            right.append("(%s)" % name)
+            rules_from_left = recurse(tree_.children_left[node], left)
+            rules_from_right = recurse(tree_.children_right[node], right)
+            rules = np.concatenate([rules_from_left, rules_from_right])
+            return rules
+        else:
+            precond = " ".join(rules)
+            precond = ":precondition (and (pickloc ?above) (stackloc ?below) %s)" % precond
+            eff = tree_.value[node][0]
+            idx = eff.argmax()
+            prob = eff[idx] / eff.sum()
+            effect = ":effect (and \n\t\t\t(probabilistic %.3f (eff%d))" % (prob, idx)
+            effect += "\n\t\t\t(not (pickloc ?above))"
+            effect += "\n\t\t\t(instack ?above)"
+            effect += "\n\t\t\t(stackloc ?above)"
+            effect += "\n\t\t\t(not (stackloc ?below)))"
+            return np.array([[precond, effect]])
+    return recurse(0, [])
