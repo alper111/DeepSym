@@ -3,6 +3,7 @@ import models
 import data
 import argparse
 import os
+import time
 
 parser = argparse.ArgumentParser("train an encoder for effect prediction")
 parser.add_argument("-lr", help="learning rate. default 1e-3", default=1e-3, type=float)
@@ -18,6 +19,13 @@ parser.add_argument("-n", help="batch norm. default 0.", default=0, type=int)
 parser.add_argument("-load", help="load model.", type=str)
 parser.add_argument("-save", help="save model.", type=str, required=True)
 args = parser.parse_args()
+
+arg_dict = vars(args)
+for key in arg_dict.keys():
+    print("%s: %s" % (key, arg_dict[key]))
+    print("%s: %s" % (key, arg_dict[key]), file=open(os.path.join(args.save, "args.txt"), "a"))
+print("date: %s" % time.asctime(time.localtime(time.time())))
+print("date: %s" % time.asctime(time.localtime(time.time())), file=(open(os.path.join(args.save, "args.txt"), "a")))
 
 device = torch.device(args.dv)
 
