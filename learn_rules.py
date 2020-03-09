@@ -6,6 +6,10 @@ codes_second = torch.load("save/codes_second.torch")
 codes_first = torch.load("save/objcodes_second.torch")
 codes = torch.cat([codes_first, codes_second], dim=-1)
 effects = torch.load("data/effects_2.torch")
+eff_mu = effects.mean(dim=0)
+eff_std = effects.std(dim=0)
+effects = (effects - eff_mu) / (eff_std + 1e-6)
+effects = effects.abs()
 
 # need a mechanism to select the number K
 K = 6
