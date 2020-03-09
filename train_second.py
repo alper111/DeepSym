@@ -15,7 +15,8 @@ parser.add_argument("-cd", help="code dimension. default 2.", default=2, type=in
 parser.add_argument("-cnn", help="MLP (0) or CNN (1). default 0.", default=0, type=int)
 parser.add_argument("-f", help="filters if CNN is used.", nargs="+", type=int)
 parser.add_argument("-n", help="batch norm. default 0.", default=0, type=int)
-parser.add_argument("-ckpt", help="load from checkpoint.", type=str)
+parser.add_argument("-load", help="load model.", type=str)
+parser.add_argument("-save", help="save model.", type=str, required=True)
 args = parser.parse_args()
 
 device = torch.device(args.dv)
@@ -47,9 +48,9 @@ else:
     encoder = torch.nn.Sequential(*encoder).to(device)
 
 decoder = models.MLP([args.cd+trainset.codes.shape[-1]*2]+[args.hid]*args.d+[6]).to(device)
-if args.ckpt is not None:
-    encoder.load_state_dict(torch.load(os.path.join(args.ckpt, "encoder_second.ckpt")))
-    decoder.load_state_dict(torch.load(os.path.join(args.ckpt, "decoder_second.ckpt")))
+if args.load is not None:
+    encoder.load_state_dict(torch.load(os.path.join(args.load, "encoder_second.ckpt")))
+    decoder.load_state_dict(torch.load(os.path.join(args.load, "decoder_second.ckpt")))
 
 print("="*10+"ENCODER"+"="*10)
 print(encoder)
@@ -91,7 +92,7 @@ for e in range(args.e):
 sample = iter(load_all).next()
 with torch.no_grad():
     codes = encoder(sample["object"].to(device)).cpu()
-torch.save(codes, "save/codes_second.torch")
-torch.save(sample["code"], "save/objcodes_second.torch")
-torch.save(encoder.eval().cpu().state_dict(), "save/encoder_second.ckpt")
-torch.save(decoder.eval().cpu().state_dict(), "save/decoder_second.ckpt")
+torch.save(codes, os.path.join(args.save, "codes_second.torch"))
+torch.save(sample["code"], os.path.join(args.save, "objcodes_second.torch"))
+torch.save(encoder.eval().cpu().state_dict(), os.path.join(args.save, "encoder_second.ckpt"))
+torch.save(decoder.eval().cpu().state_dict(), os.path.join(args.save, "decoder_second.ckpt"))
