@@ -20,6 +20,9 @@ parser.add_argument("-load", help="load model.", type=str)
 parser.add_argument("-save", help="save model.", type=str, required=True)
 args = parser.parse_args()
 
+if not os.path.exists(args.save):
+    os.makedirs(args.save)
+
 arg_dict = vars(args)
 for key in arg_dict.keys():
     print("%s: %s" % (key, arg_dict[key]))
