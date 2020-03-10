@@ -1,9 +1,16 @@
 from sklearn.tree import DecisionTreeClassifier
 import torch
 import utils
+import argparse
+import os
 
-codes_second = torch.load("save/codes_second.torch")
-codes_first = torch.load("save/objcodes_second.torch")
+parser = argparse.ArgumentParser("learn pddl rules from decision tree.")
+parser.add_argument("-load", help="object path", type=str)
+args = parser.parse_args()
+
+
+codes_second = torch.load(os.path.join(args.load, "codes_second.torch"))
+codes_first = torch.load(os.path.join(args.load, "objcodes_second.torch"))
 codes = torch.cat([codes_first, codes_second], dim=-1)
 effects = torch.load("data/effects_2.torch")
 eff_mu = effects.mean(dim=0)
