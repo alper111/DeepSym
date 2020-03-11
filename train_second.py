@@ -33,7 +33,7 @@ print("date: %s" % time.asctime(time.localtime(time.time())), file=(open(os.path
 device = torch.device(args.dv)
 
 trainset = data.SecondLevelDataset()
-loader = torch.utils.data.DataLoader(trainset, batch_size=args.bs)
+loader = torch.utils.data.DataLoader(trainset, batch_size=args.bs, shuffle=True)
 load_all = torch.utils.data.DataLoader(trainset, batch_size=2500, shuffle=False)
 
 if args.cnn == 0:

@@ -33,7 +33,7 @@ print("date: %s" % time.asctime(time.localtime(time.time())), file=(open(os.path
 device = torch.device(args.dv)
 
 trainset = data.FirstLevelDataset()
-loader = torch.utils.data.DataLoader(trainset, batch_size=args.bs)
+loader = torch.utils.data.DataLoader(trainset, batch_size=args.bs, shuffle=True)
 
 if args.cnn == 0:
     encoder = torch.nn.Sequential(
@@ -74,9 +74,10 @@ optimizer = torch.optim.Adam(
     params=[
         {"params": encoder.parameters()},
         {"params": decoder.parameters()}
-    ]
+    ],
+    amsgrad=True
 )
-criterion = torch.nn.MSELoss(reduction="mean")
+criterion = torch.nn.MSELoss(reduction="sum")
 avg_loss = 0.0
 it = 0
 for e in range(args.e):
@@ -99,6 +100,16 @@ for e in range(args.e):
 
     if (e+1) % 100 == 0:
         print("it: %d, loss: %.4f" % (it, avg_loss/it))
+        # print("encoder")
+        # for p in encoder.parameters():
+        #     print(p.data.abs().mean())
+        # print("decoder")
+        # for p in decoder.parameters():
+        #     print(p.data.abs().mean())
+        # print("="*30)
+        # print(y_bar[0].detach())
+        # print(y[0])
+        # print("="*30)
 
 with torch.no_grad():
     encoder.eval()
