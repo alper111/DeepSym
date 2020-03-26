@@ -54,10 +54,10 @@ class SecondLevelDataset(torch.utils.data.Dataset):
         self.objects = (self.objects - self.obj_mu) / (self.obj_std + 1e-6)
         self.objects = self.objects.reshape(-1, 1, 128, 128)
 
+        self.effects = self.effects.abs()
         self.eff_mu = self.effects.mean(dim=0)
         self.eff_std = self.effects.std(dim=0)
         self.effects = (self.effects - self.eff_mu) / (self.eff_std + 1e-6)
-        self.effects = self.effects.abs()
 
     def __len__(self):
         return len(self.relations)
