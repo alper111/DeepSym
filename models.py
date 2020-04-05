@@ -24,7 +24,7 @@ class STLayer(torch.nn.Module):
 
 
 class Linear(torch.nn.Module):
-    '''linear layer with optional batch normalization or layer normalization'''
+    """ linear layer with optional batch normalization or layer normalization """
     def __init__(self, in_features, out_features, std=None, normalization=None):
         super(Linear, self).__init__()
         self.in_features = in_features
@@ -59,7 +59,7 @@ class Linear(torch.nn.Module):
 
 
 class MLP(torch.nn.Module):
-    '''multi-layer perceptron with batch norm option'''
+    """ multi-layer perceptron with batch norm option """
     def __init__(self, layer_info, activation=torch.nn.ReLU(), std=None, normalization=None):
         super(MLP, self).__init__()
         layers = []

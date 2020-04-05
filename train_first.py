@@ -100,16 +100,6 @@ for e in range(args.e):
 
     if (e+1) % 100 == 0:
         print("it: %d, loss: %.4f" % (it, avg_loss/it))
-        # print("encoder")
-        # for p in encoder.parameters():
-        #     print(p.data.abs().mean())
-        # print("decoder")
-        # for p in decoder.parameters():
-        #     print(p.data.abs().mean())
-        # print("="*30)
-        # print(y_bar[0].detach())
-        # print(y[0])
-        # print("="*30)
 
 with torch.no_grad():
     encoder.eval()

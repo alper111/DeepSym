@@ -3,7 +3,7 @@ import numpy as np
 
 
 class FirstLevelDataset(torch.utils.data.Dataset):
-    """ custom pytorch dataset class for first level object-action-effect data"""
+    """ custom pytorch dataset class for first level object-action-effect data """
     def __init__(self):
         self.action_names = np.load("data/action_names.npy")
         self.obj_names = np.load("data/obj_names.npy")
@@ -37,7 +37,7 @@ class FirstLevelDataset(torch.utils.data.Dataset):
 
 
 class SecondLevelDataset(torch.utils.data.Dataset):
-    """ custom pytorch dataset class for second level object-action-effect data"""
+    """ custom pytorch dataset class for second level object-action-effect data """
     def __init__(self):
         self.action_names = np.load("data/action_names.npy")
         self.obj_names = np.load("data/obj_names.npy")

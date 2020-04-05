@@ -4,7 +4,7 @@ from sklearn.tree import _tree
 
 
 def kmeans(x, k, centroids=None, max_iter=None, epsilon=0.01):
-    '''
+    """
     x: data set of size (n, d) where n is the sample size.
     k: number of clusters
     centroids (optional): initial centroids
@@ -14,7 +14,7 @@ def kmeans(x, k, centroids=None, max_iter=None, epsilon=0.01):
     centroids: centroids found by k-means algorithm
     next_assigns: assignment vector
     mse: mean squared error
-    '''
+    """
     if centroids is None:
         centroids = torch.zeros(k, x.shape[1], device=x.device)
         prev_assigns = torch.randint(0, k, (x.shape[0],), device=x.device)
