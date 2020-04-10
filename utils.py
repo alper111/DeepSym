@@ -1,6 +1,7 @@
 import torch
 import numpy as np
 from sklearn.tree import _tree
+from torch.distributions import Gumbel
 
 
 def kmeans(x, k, centroids=None, max_iter=None, epsilon=0.01):
@@ -82,3 +83,17 @@ def tree_to_code(tree, feature_names):
             effect += "\n\t\t\t(not (stackloc ?below)))"
             return np.array([[precond, effect]])
     return recurse(0, [])
+
+
+def gumbel_softmax_sample(logits, temp=1.):
+    g = Gumbel(0, 1).sample(logits.shape)
+    y = (g + logits) / temp
+    return torch.softmax(y, dim=-1)
+
+
+def gumbel_softmax(logits, temp=1.):
+    y = gumbel_softmax_sample(logits, temp)
+    ind = torch.argmax(y, dim=-1)
+    y_hard = torch.eye(logits.shape[-1], device=logits.device)[ind]
+    y = (y_hard - y).detach() + y
+    return y
