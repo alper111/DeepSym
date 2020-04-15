@@ -97,3 +97,14 @@ def gumbel_softmax(logits, temp=1.):
     y_hard = torch.eye(logits.shape[-1], device=logits.device)[ind]
     y = (y_hard - y).detach() + y
     return y
+
+
+def get_parameter_count(model):
+    total_num = 0
+    for p in model.parameters():
+        shape = p.shape
+        num = 1
+        for d in shape:
+            num *= d
+        total_num += num
+    return total_num
