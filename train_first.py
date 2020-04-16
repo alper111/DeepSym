@@ -1,9 +1,12 @@
+import os
+import argparse
+import time
 import torch
+from torchvision import transforms
 import models
 import data
-import argparse
-import os
-import time
+import utils
+
 
 parser = argparse.ArgumentParser("train an encoder for effect prediction")
 parser.add_argument("-lr", help="learning rate. default 1e-3", default=1e-3, type=float)
@@ -31,27 +34,34 @@ print("date: %s" % time.asctime(time.localtime(time.time())))
 print("date: %s" % time.asctime(time.localtime(time.time())), file=(open(os.path.join(args.save, "args.txt"), "a")))
 
 device = torch.device(args.dv)
+SIZE = 64
 
-trainset = data.FirstLevelDataset()
+transform = transforms.Compose([
+    transforms.ToPILImage(),
+    transforms.Resize((SIZE, SIZE)),
+    transforms.ToTensor(),
+    transforms.Normalize([0.1120], [0.0197])
+])
+trainset = data.FirstLevelDataset(transform=transform)
 loader = torch.utils.data.DataLoader(trainset, batch_size=args.bs, shuffle=True)
+
+normalization = "batch_norm" if args.n == 1 else None
 
 if args.cnn == 0:
     encoder = torch.nn.Sequential(
         models.Flatten([1, 2, 3]),
-        models.MLP([128*128]+[args.hid]*args.d+[args.cd], normalization="batch_norm" if args.n == 1 else None),
+        models.MLP([SIZE**2]+[args.hid]*args.d+[args.cd], normalization=normalization),
         models.STLayer()
     ).to(device)
 else:
     L = len(args.f)-1
-    denum = 2**L
-    lat = args.f[-1] * ((128 // denum)**2)
-    encoder = [models.ConvBlock(
-        in_channels=args.f[i],
-        out_channels=args.f[i+1],
-        kernel_size=3,
-        stride=2,
-        padding=1,
-        batch_norm=True if args.n == 1 else False) for i in range(L)]
+    denum = 4**L
+    lat = args.f[-1] * ((SIZE // denum)**2)
+    encoder = []
+    bn = True if args.n == 1 else False
+    for i in range(L):
+        encoder.append(models.ConvBlock(args.f[i], args.f[i+1], 4, 1, 1, batch_norm=bn))
+        encoder.append(models.ConvBlock(args.f[i+1], args.f[i+1], 4, 4, 1, batch_norm=bn))
     encoder.append(models.Flatten([1, 2, 3]))
     encoder.append(models.MLP([lat, args.cd]))
     encoder.append(models.STLayer())
@@ -64,9 +74,11 @@ if args.load is not None:
 
 print("="*10+"ENCODER"+"="*10)
 print(encoder)
+print("parameter count: %d" % utils.get_parameter_count(encoder))
 print("="*27)
 print("="*10+"DECODER"+"="*10)
 print(decoder)
+print("parameter count: %d" % utils.get_parameter_count(decoder))
 print("="*27)
 
 optimizer = torch.optim.Adam(
@@ -77,7 +89,7 @@ optimizer = torch.optim.Adam(
     ],
     amsgrad=True
 )
-criterion = torch.nn.MSELoss(reduction="sum")
+criterion = torch.nn.MSELoss(reduction="mean")
 avg_loss = 0.0
 it = 0
 for e in range(args.e):
@@ -103,7 +115,13 @@ for e in range(args.e):
 
 with torch.no_grad():
     encoder.eval()
-    codes = encoder(trainset.objects.to(device)).cpu()
+    x = trainset.objects
+    if trainset.transform:
+        x_t = []
+        for x_i in x:
+            x_t.append(trainset.transform(x_i))
+        x = torch.stack(x_t, dim=0)
+    codes = encoder(x.to(device)).cpu()
 torch.save(codes, os.path.join(args.save, "codes_first.torch"))
 torch.save(encoder.eval().cpu().state_dict(), os.path.join(args.save, "encoder_first.ckpt"))
 torch.save(decoder.eval().cpu().state_dict(), os.path.join(args.save, "decoder_first.ckpt"))
