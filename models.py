@@ -25,7 +25,7 @@ class STLayer(torch.nn.Module):
 
 class Linear(torch.nn.Module):
     """ linear layer with optional batch normalization or layer normalization """
-    def __init__(self, in_features, out_features, std=None, normalization=None):
+    def __init__(self, in_features, out_features, std=None, normalization=None, gain=None):
         super(Linear, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
@@ -41,8 +41,10 @@ class Linear(torch.nn.Module):
             self.weight.data.normal_(0., std)
             self.bias.data.normal_(0., std)
         else:
-            # he initialization for ReLU activation
-            stdv = math.sqrt(2 / self.weight.size(1))
+            # defaults to linear activation
+            if gain is None:
+                gain = 1
+            stdv = math.sqrt(gain / self.weight.size(1))
             self.weight.data.normal_(0., stdv)
             self.bias.data.zero_()
 
@@ -60,15 +62,19 @@ class Linear(torch.nn.Module):
 
 class MLP(torch.nn.Module):
     """ multi-layer perceptron with batch norm option """
-    def __init__(self, layer_info, activation=torch.nn.ReLU(), std=None, normalization=None):
+    def __init__(self, layer_info, activation=torch.nn.ReLU(), std=None, normalization=None, indrop=None, hiddrop=None):
         super(MLP, self).__init__()
         layers = []
         in_dim = layer_info[0]
-        for l in layer_info[1:-1]:
-            layers.append(Linear(in_features=in_dim, out_features=l, std=std, normalization=normalization))
+        for i, unit in enumerate(layer_info[1:-1]):
+            if i == 0 and indrop:
+                layers.append(torch.nn.Dropout(indrop))
+            elif i > 0 and hiddrop:
+                layers.append(torch.nn.Dropout(hiddrop))
+            layers.append(Linear(in_features=in_dim, out_features=unit, std=std, normalization=normalization, gain=2))
             layers.append(activation)
-            in_dim = l
-        layers.append(Linear(in_features=in_dim, out_features=layer_info[-1], std=std, normalization=None))
+            in_dim = unit
+        layers.append(Linear(in_features=in_dim, out_features=layer_info[-1], normalization=None))
         self.layers = torch.nn.Sequential(*layers)
 
     def forward(self, x):
