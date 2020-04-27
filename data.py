@@ -9,12 +9,10 @@ class FirstLevelDataset(torch.utils.data.Dataset):
         self.action_names = np.load("data/action_names.npy")
         self.obj_names = np.load("data/obj_names.npy")
 
-        self.objects = torch.load("data/object_depths.torch")
+        self.objects = torch.load("data/objectsY.torch")
         self.targets = torch.load("data/targets.torch")
         self.actions = torch.load("data/actions.torch")
         self.effects = torch.load("data/effects_1.torch")
-
-        self.objects = self.objects.unsqueeze(1)
 
         self.effects = torch.cat([self.effects[:, :2], self.effects[:, 3:]], dim=1)
         self.eff_mu = self.effects.mean(dim=0)
@@ -26,7 +24,8 @@ class FirstLevelDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         sample = {}
-        sample["object"] = self.objects[self.targets[idx]]
+        sample["object"] = self.objects[self.targets[idx], np.random.randint(0, 25)]
+        sample["object"].unsqueeze_(0)
         if self.transform:
             sample["object"] = self.transform(sample["object"])
         sample["action"] = self.actions[idx]
@@ -41,12 +40,10 @@ class SecondLevelDataset(torch.utils.data.Dataset):
         self.action_names = np.load("data/action_names.npy")
         self.obj_names = np.load("data/obj_names.npy")
 
-        self.objects = torch.load("data/object_depths.torch")
+        self.objects = torch.load("data/objectsY.torch")
         self.codes = torch.load("save/codes_first.torch")
         self.relations = torch.load("data/relations.torch")
         self.effects = torch.load("data/effects_2.torch")
-
-        self.objects = self.objects.unsqueeze(1)
 
         self.effects = self.effects.abs()
         self.eff_mu = self.effects.mean(dim=0)
@@ -58,9 +55,11 @@ class SecondLevelDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         sample = {}
-        sample["object"] = self.objects[self.relations[idx]].squeeze(1)
+        x = self.objects[self.relations[idx], np.random.randint(0, 25, (2,))]
         if self.transform:
-            sample["object"] = self.transform(sample["object"])
+            sample["object"] = torch.cat([self.transform(x[0]), self.transform(x[1])])
+        else:
+            sample["object"] = x
         sample["code"] = self.codes[self.relations[idx]].reshape(-1)
         sample["effect"] = self.effects[idx]
         return sample
