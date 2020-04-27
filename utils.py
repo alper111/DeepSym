@@ -52,7 +52,7 @@ def kmeans(x, k, centroids=None, max_iter=None, epsilon=0.01):
     return centroids, next_assigns, prev_mse, it
 
 
-def tree_to_code(tree, feature_names):
+def tree_to_code(tree, feature_names, stack_idx):
     tree_ = tree.tree_
     feature_name = [
         feature_names[i] if i != _tree.TREE_UNDEFINED else "undefined!"
@@ -74,12 +74,17 @@ def tree_to_code(tree, feature_names):
             precond = " ".join(rules)
             precond = ":precondition (and (pickloc ?above) (stackloc ?below) %s)" % precond
             eff = tree_.value[node][0]
-            idx = eff.argmax()
-            prob = eff[idx] / eff.sum()
-            effect = ":effect (and \n\t\t\t(probabilistic %.3f (eff%d))" % (prob, idx)
+            effect = ":effect (and \n\t\t(probabilistic"
+            for i in range(len(eff)):
+                if i == stack_idx:
+                    effect += " %.3f (stack_eff)" % (eff[i]/eff.sum())
+                else:
+                    effect += " %.3f (eff%d)" % ((eff[i] / eff.sum()), i)
+            effect += ")"
             effect += "\n\t\t\t(not (pickloc ?above))"
             effect += "\n\t\t\t(instack ?above)"
-            effect += "\n\t\t\t(stackloc ?above)"
+            # effect += "\n\t\t\t(stackloc ?above)"
+            effect += "\n\t\t\t(not (compared))"
             effect += "\n\t\t\t(not (stackloc ?below)))"
             return np.array([[precond, effect]])
     return recurse(0, [])
