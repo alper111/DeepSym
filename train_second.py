@@ -34,13 +34,13 @@ print("date: %s" % time.asctime(time.localtime(time.time())))
 print("date: %s" % time.asctime(time.localtime(time.time())), file=(open(os.path.join(args.save, "args.txt"), "a")))
 
 device = torch.device(args.dv)
-SIZE = 64
+SIZE = 128
 
 transform = transforms.Compose([
     transforms.ToPILImage(),
     transforms.Resize((SIZE, SIZE)),
     transforms.ToTensor(),
-    transforms.Normalize([0.1120], [0.0197])
+    transforms.Normalize([0.279], [0.0094])
 ])
 
 trainset = data.SecondLevelDataset(transform=transform)

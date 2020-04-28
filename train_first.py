@@ -34,16 +34,22 @@ print("date: %s" % time.asctime(time.localtime(time.time())))
 print("date: %s" % time.asctime(time.localtime(time.time())), file=(open(os.path.join(args.save, "args.txt"), "a")))
 
 device = torch.device(args.dv)
-SIZE = 64
+SIZE = 128
 
 transform = transforms.Compose([
     transforms.ToPILImage(),
     transforms.Resize((SIZE, SIZE)),
+    transforms.RandomAffine(
+        degrees=0,
+        translate=(0.1, 0.1),
+        fillcolor=int(0.285 * 255)
+    ),
     transforms.ToTensor(),
-    transforms.Normalize([0.1120], [0.0197])
+    transforms.Normalize([0.279], [0.0094])
 ])
 trainset = data.FirstLevelDataset(transform=transform)
 loader = torch.utils.data.DataLoader(trainset, batch_size=args.bs, shuffle=True)
+load_all = torch.utils.data.DataLoader(trainset, batch_size=150, shuffle=False)
 
 normalization = "batch_norm" if args.n == 1 else None
 
@@ -55,13 +61,13 @@ if args.cnn == 0:
     ).to(device)
 else:
     L = len(args.f)-1
-    denum = 4**L
+    stride = 2
+    denum = stride**L
     lat = args.f[-1] * ((SIZE // denum)**2)
     encoder = []
     bn = True if args.n == 1 else False
     for i in range(L):
-        encoder.append(models.ConvBlock(args.f[i], args.f[i+1], 4, 1, 1, batch_norm=bn))
-        encoder.append(models.ConvBlock(args.f[i+1], args.f[i+1], 4, 4, 1, batch_norm=bn))
+        encoder.append(models.ConvBlock(args.f[i], args.f[i+1], 4, stride, 1, batch_norm=bn))
     encoder.append(models.Flatten([1, 2, 3]))
     encoder.append(models.MLP([lat, args.cd]))
     encoder.append(models.STLayer())
@@ -113,15 +119,11 @@ for e in range(args.e):
     if (e+1) % 100 == 0:
         print("it: %d, loss: %.4f" % (it, avg_loss/it))
 
+
+sample = iter(load_all).next()
 with torch.no_grad():
-    encoder.eval()
-    x = trainset.objects
-    if trainset.transform:
-        x_t = []
-        for x_i in x:
-            x_t.append(trainset.transform(x_i))
-        x = torch.stack(x_t, dim=0)
-    codes = encoder(x.to(device)).cpu()
+    codes = encoder(sample["object"].to(device)).cpu()
+
 torch.save(codes, os.path.join(args.save, "codes_first.torch"))
 torch.save(encoder.eval().cpu().state_dict(), os.path.join(args.save, "encoder_first.ckpt"))
 torch.save(decoder.eval().cpu().state_dict(), os.path.join(args.save, "decoder_first.ckpt"))
