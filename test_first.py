@@ -11,7 +11,7 @@ args = parser.parse_args()
 trainset = data.FirstLevelDataset()
 codes = torch.load(os.path.join(args.ckpt, "codes_first.torch"))
 
-fig, ax = plt.subplots(5, 10, figsize=(18, 10))
+fig, ax = plt.subplots(5, 10, figsize=(12, 7))
 
 for i in range(5):
     for j in range(10):
