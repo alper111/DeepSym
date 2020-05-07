@@ -11,18 +11,19 @@ parser.add_argument("-ckpt", help="checkpoint folder path.", type=str)
 args = parser.parse_args()
 
 file_loc = os.path.join(args.ckpt, "opts.yaml")
-opts = yaml.load(open(file_loc, "r"))
+opts = yaml.load(open(file_loc, "r"), Loader=yaml.FullLoader)
 opts["device"] = "cpu"
 
 model = models.AffordanceModel(opts)
-model.load(args.ckpt, "best")
+model.load(args.ckpt, "_best")
 
 transform = data.default_transform(size=opts["size"], affine=False, mean=0.279, std=0.0094)
 trainset = data.FirstLevelDataset(transform=transform)
 loader = torch.utils.data.DataLoader(trainset, batch_size=150, shuffle=False)
 objects = iter(loader).next()["object"]
 model.encoder.eval()
-codes = model.encoder(objects)
+with torch.no_grad():
+    codes = model.encoder(objects)
 
 fig, ax = plt.subplots(5, 10, figsize=(12, 7))
 for i in range(5):
