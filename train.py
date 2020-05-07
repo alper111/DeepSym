@@ -17,19 +17,24 @@ print(yaml.dump(opts))
 
 device = torch.device(opts["device"])
 
+# load the first level data
 transform = data.default_transform(size=opts["size"], affine=True, mean=0.279, std=0.0094)
 trainset = data.FirstLevelDataset(transform=transform)
 loader = torch.utils.data.DataLoader(trainset, batch_size=opts["batch_size"], shuffle=True)
-load_all = torch.utils.data.DataLoader(trainset, batch_size=150, shuffle=False)
 
 model = models.AffordanceModel(opts)
 if opts["load"] is not None:
-    model.load(opts["load"], ext="")
-model.print_model()
-model.train(opts["epoch"], loader)
+    model.load(opts["load"], ext="", level=1)
+    model.load(opts["load"], ext="", level=2)
+model.print_model(1)
+model.train(opts["epoch"], loader, 1)
 
-sample = iter(load_all).next()
-with torch.no_grad():
-    codes = model.encoder(sample["object"].to(device)).cpu()
+# load the best encoder1
+model.load(opts["save"], "_best", 1)
 
-torch.save(codes, os.path.join(opts["save"], "codes_first.pt"))
+# load the second level data
+transform = data.default_transform(size=opts["size"], affine=True, mean=0.279, std=0.0094)
+trainset = data.SecondLevelDataset(transform=transform)
+loader = torch.utils.data.DataLoader(trainset, batch_size=50, shuffle=True)
+model.print_model(2)
+model.train(50, loader, 2)
