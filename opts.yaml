@@ -1,13 +1,14 @@
-learning_rate: 0.001
+learning_rate: 0.0001
 batch_size: 30
-epoch: 10000
+epoch: 500
 device: cuda:0
 hidden_dim: 128
 code1_dim: 2
 code2_dim: 1
 depth: 2
 cnn: true
-filters: [1, 32, 64, 128, 256, 512]
+filters1: [1, 32, 64, 128, 256, 512]
+filters2: [2, 32, 64, 128, 256, 512]
 batch_norm: true
 size: 128
 load: null

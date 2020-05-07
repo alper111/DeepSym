@@ -63,7 +63,7 @@ class AffordanceModel:
             if epoch_loss < best_loss:
                 best_loss = epoch_loss
                 self.save(self.save_path, "_best", level)
-            if (e+1) % 100 == 0:
+            if (e+1) % 50 == 0:
                 print("Epoch: %d, iter: %d, loss: %.4f" % (e+1, self.iteration, epoch_loss))
                 self.save(self.save_path, "_last", level)
 
@@ -234,17 +234,17 @@ def build_encoder(opts, level):
     else:
         code_dim = opts["code2_dim"]
     if opts["cnn"]:
-        L = len(opts["filters"])-1
+        L = len(opts["filters"+str(level)])-1
         stride = 2
         # denum = stride**L
-        # lat = opts["filters"][-1] * ((opts["size"]//denum)**2)
+        # lat = opts["filters"+str(level)][-1] * ((opts["size"]//denum)**2)
         encoder = []
         for i in range(L):
-            encoder.append(ConvBlock(in_channels=opts["filters"][i], out_channels=opts["filters"][i+1],
+            encoder.append(ConvBlock(in_channels=opts["filters"+str(level)][i], out_channels=opts["filters"+str(level)][i+1],
                                      kernel_size=4, stride=stride, padding=1, batch_norm=opts["batch_norm"]))
         encoder.append(Avg([2, 3]))
         # encoder.append(MLP([lat, code_dim]))
-        encoder.append(MLP([opts["filters"][-1], code_dim]))
+        encoder.append(MLP([opts["filters"+str(level)][-1], code_dim]))
         encoder.append(STLayer())
     else:
         encoder = [
