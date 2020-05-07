@@ -24,18 +24,15 @@ class STLayer(torch.nn.Module):
 
 
 class Linear(torch.nn.Module):
-    """ linear layer with optional batch normalization or layer normalization """
-    def __init__(self, in_features, out_features, std=None, normalization=None, gain=None):
+    """ linear layer with optional batch normalization. """
+    def __init__(self, in_features, out_features, std=None, batch_norm=False, gain=None):
         super(Linear, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
         self.weight = torch.nn.Parameter(torch.Tensor(out_features, in_features))
         self.bias = torch.nn.Parameter(torch.Tensor(out_features))
-        self.normalization = normalization
-        if normalization == 'batch_norm':
-            self.normalization_func = torch.nn.BatchNorm1d(num_features=self.out_features)
-        elif normalization == 'layer_norm':
-            self.normalization_func = torch.nn.LayerNorm(normalized_shape=self.out_features)
+        if batch_norm:
+            self.batch_norm = torch.nn.BatchNorm1d(num_features=self.out_features)
 
         if std is not None:
             self.weight.data.normal_(0., std)
@@ -50,19 +47,17 @@ class Linear(torch.nn.Module):
 
     def forward(self, x):
         x = torch.nn.functional.linear(x, self.weight, self.bias)
-        if self.normalization:
-            x = self.normalization_func(x)
+        if hasattr(self, "batch_norm"):
+            x = self.batch_norm(x)
         return x
 
     def extra_repr(self):
-        return 'in_features={}, out_features={}, normalization={}'.format(
-            self.in_features, self.out_features, self.normalization
-        )
+        return "in_features={}, out_features={}".format(self.in_features, self.out_features)
 
 
 class MLP(torch.nn.Module):
     """ multi-layer perceptron with batch norm option """
-    def __init__(self, layer_info, activation=torch.nn.ReLU(), std=None, normalization=None, indrop=None, hiddrop=None):
+    def __init__(self, layer_info, activation=torch.nn.ReLU(), std=None, batch_norm=False, indrop=None, hiddrop=None):
         super(MLP, self).__init__()
         layers = []
         in_dim = layer_info[0]
@@ -71,10 +66,10 @@ class MLP(torch.nn.Module):
                 layers.append(torch.nn.Dropout(indrop))
             elif i > 0 and hiddrop:
                 layers.append(torch.nn.Dropout(hiddrop))
-            layers.append(Linear(in_features=in_dim, out_features=unit, std=std, normalization=normalization, gain=2))
+            layers.append(Linear(in_features=in_dim, out_features=unit, std=std, batch_norm=batch_norm, gain=2))
             layers.append(activation)
             in_dim = unit
-        layers.append(Linear(in_features=in_dim, out_features=layer_info[-1], normalization=None))
+        layers.append(Linear(in_features=in_dim, out_features=layer_info[-1], batch_norm=False))
         self.layers = torch.nn.Sequential(*layers)
 
     def forward(self, x):
