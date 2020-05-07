@@ -53,9 +53,9 @@ class AffordanceModel:
                 print("Epoch: %d, iter: %d, loss: %.4f" % (e+1, self.iteration, epoch_loss))
                 self.save(self.save_path, "_last")
 
-    def load(self, path):
-        encoder_dict = torch.load(os.path.join(path, "encoder_first.ckpt"))
-        decoder_dict = torch.load(os.path.join(path, "decoder_first.ckpt"))
+    def load(self, path, ext):
+        encoder_dict = torch.load(os.path.join(path, "encoder_first"+ext+".ckpt"))
+        decoder_dict = torch.load(os.path.join(path, "decoder_first"+ext+".ckpt"))
         self.encoder.load_state_dict(encoder_dict)
         self.decoder.load_state_dict(decoder_dict)
 
