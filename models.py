@@ -120,3 +120,28 @@ class Avg(torch.nn.Module):
 
     def extra_repr(self):
         return "dims=[" + ", ".join(list(map(str, self.dims))) + "]"
+
+
+def build_encoder(opts):
+    if opts["cnn"]:
+        L = len(opts["filters"])-1
+        stride = 2
+        # denum = stride**L
+        # lat = opts["filters"][-1] * ((opts["size"]//denum)**2)
+        encoder = []
+        for i in range(L):
+            encoder.append(ConvBlock(in_channels=opts["filters"][i], out_channels=opts["filters"][i+1],
+                                     kernel_size=4, stride=stride, padding=1, batch_norm=opts["batch_norm"]))
+        encoder.append(Avg([2, 3]))
+        # encoder.append(MLP([lat, opts["code_dim"]]))
+        encoder.append(MLP([opts["filters"][-1], opts["code_dim"]]))
+        encoder.append(STLayer())
+    else:
+        encoder = [
+            Flatten(1, 2, 3),
+            MLP([[opts["size"]**2] + [opts["hidden_dim"]]*opts["depth"] + [opts["code_dim"]]],
+                batch_norm=opts["batch_norm"]),
+            STLayer()]
+
+    encoder = torch.nn.Sequential(*encoder)
+    return encoder
