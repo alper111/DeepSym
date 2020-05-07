@@ -25,8 +25,8 @@ class FirstLevelDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         sample = {}
-        # sample["object"] = self.objects[self.targets[idx], np.random.randint(0, 25)]
-        sample["object"] = self.objects[self.targets[idx], 12]
+        sample["object"] = self.objects[self.targets[idx], np.random.randint(0, 25)]
+        # sample["object"] = self.objects[self.targets[idx], 12]
         sample["object"].unsqueeze_(0)
         if self.transform:
             sample["object"] = self.transform(sample["object"])
