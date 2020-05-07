@@ -63,9 +63,8 @@ class AffordanceModel:
             if epoch_loss < best_loss:
                 best_loss = epoch_loss
                 self.save(self.save_path, "_best", level)
-            if (e+1) % 50 == 0:
-                print("Epoch: %d, iter: %d, loss: %.4f" % (e+1, self.iteration, epoch_loss))
-                self.save(self.save_path, "_last", level)
+            print("Epoch: %d, iter: %d, loss: %.4f" % (e+1, self.iteration, epoch_loss))
+            self.save(self.save_path, "_last", level)
 
     def load(self, path, ext, level):
         if level == 1:
