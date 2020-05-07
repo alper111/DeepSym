@@ -21,16 +21,16 @@ model.encoder2.eval()
 
 transform = data.default_transform(size=opts["size"], affine=False, mean=0.279, std=0.0094)
 trainset = data.SecondLevelDataset(transform=transform)
-loader = torch.utils.data.DataLoader(trainset, batch_size=40, shuffle=True)
+loader = torch.utils.data.DataLoader(trainset, batch_size=36, shuffle=True)
 objects = iter(loader).next()["object"]
 with torch.no_grad():
     codes = model.encoder2(objects)
 
-fig, ax = plt.subplots(10, 4, figsize=(18, 18))
-for i in range(10):
-    for j in range(4):
-        idx = i * 4 + j
-        ax[i, j].imshow(objects[idx].reshape(128, 256)*0.0094+0.279)
+fig, ax = plt.subplots(6, 6, figsize=(12, 8))
+for i in range(6):
+    for j in range(6):
+        idx = i * 6 + j
+        ax[i, j].imshow(objects[idx].permute(1, 0, 2).reshape(128, 256)*0.0094+0.279)
         ax[i, j].axis("off")
         ax[i, j].set_title(codes[idx].numpy())
 plt.show()
