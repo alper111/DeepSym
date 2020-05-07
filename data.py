@@ -1,4 +1,5 @@
 import torch
+from torchvision import transforms
 import numpy as np
 
 
@@ -24,7 +25,8 @@ class FirstLevelDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         sample = {}
-        sample["object"] = self.objects[self.targets[idx], np.random.randint(0, 25)]
+        # sample["object"] = self.objects[self.targets[idx], np.random.randint(0, 25)]
+        sample["object"] = self.objects[self.targets[idx], 12]
         sample["object"].unsqueeze_(0)
         if self.transform:
             sample["object"] = self.transform(sample["object"])
@@ -63,3 +65,22 @@ class SecondLevelDataset(torch.utils.data.Dataset):
         sample["code"] = self.codes[self.relations[idx]].reshape(-1)
         sample["effect"] = self.effects[idx]
         return sample
+
+
+def default_transform(size, affine, mean, std):
+    transform = [transforms.ToPILImage()]
+    if size:
+        transform.append(transforms.Resize(size))
+    if affine:
+        transform.append(
+            transforms.RandomAffine(
+                degrees=0,
+                translate=(0.1, 0.1),
+                fillcolor=int(0.285*255)
+            )
+        )
+    transform.append(transforms.ToTensor())
+    if mean is not None:
+        transform.append(transforms.Normalize([mean], [std]))
+    transform = transforms.Compose(transform)
+    return transform
