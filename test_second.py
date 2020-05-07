@@ -2,7 +2,6 @@ import argparse
 import os
 import torch
 import yaml
-import numpy as np
 import matplotlib.pyplot as plt
 import data
 import models

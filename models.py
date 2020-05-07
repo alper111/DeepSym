@@ -240,7 +240,8 @@ def build_encoder(opts, level):
         # lat = opts["filters"+str(level)][-1] * ((opts["size"]//denum)**2)
         encoder = []
         for i in range(L):
-            encoder.append(ConvBlock(in_channels=opts["filters"+str(level)][i], out_channels=opts["filters"+str(level)][i+1],
+            encoder.append(ConvBlock(in_channels=opts["filters"+str(level)][i],
+                                     out_channels=opts["filters"+str(level)][i+1],
                                      kernel_size=4, stride=stride, padding=1, batch_norm=opts["batch_norm"]))
         encoder.append(Avg([2, 3]))
         # encoder.append(MLP([lat, code_dim]))
