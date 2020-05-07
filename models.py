@@ -213,7 +213,7 @@ def build_encoder(opts):
         encoder.append(STLayer())
     else:
         encoder = [
-            Flatten(1, 2, 3),
+            Flatten([1, 2, 3]),
             MLP([[opts["size"]**2] + [opts["hidden_dim"]]*opts["depth"] + [opts["code_dim"]]],
                 batch_norm=opts["batch_norm"]),
             STLayer()]
