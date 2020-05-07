@@ -19,7 +19,7 @@ model.load(args.ckpt, "_best", 1)
 
 transform = data.default_transform(size=opts["size"], affine=False, mean=0.279, std=0.0094)
 trainset = data.FirstLevelDataset(transform=transform)
-loader = torch.utils.data.DataLoader(trainset, batch_size=150, shuffle=False)
+loader = torch.utils.data.DataLoader(trainset, batch_size=50, shuffle=True)
 objects = iter(loader).next()["object"]
 model.encoder1.eval()
 with torch.no_grad():
