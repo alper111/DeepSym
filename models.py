@@ -10,7 +10,6 @@ class AffordanceModel:
         self.device = torch.device(opts["device"])
         self.encoder = build_encoder(opts).to(self.device)
         self.decoder = MLP([opts["code_dim"] + 3] + [opts["hidden_dim"]] * opts["depth"] + [3]).to(self.device)
-        print("lr:", opts["learning_rate"])
         self.optimizer = torch.optim.Adam(lr=opts["learning_rate"],
                                           params=[
                                               {"params": self.encoder.parameters()},
