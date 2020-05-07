@@ -112,7 +112,7 @@ class Flatten(torch.nn.Module):
         return x.reshape(-1, dim)
 
     def extra_repr(self):
-        return "dims=[" + ", ".join(list(map(lambda x: str(x), self.dims))) + "]"
+        return "dims=[" + ", ".join(list(map(str, self.dims))) + "]"
 
 
 class Avg(torch.nn.Module):
@@ -124,4 +124,4 @@ class Avg(torch.nn.Module):
         return x.mean(dim=self.dims)
 
     def extra_repr(self):
-        return "dims=[" + ", ".join(list(map(lambda x: str(x), self.dims))) + "]"
+        return "dims=[" + ", ".join(list(map(str, self.dims))) + "]"
