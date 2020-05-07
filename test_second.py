@@ -1,25 +1,36 @@
-import torch
-import numpy as np
-import data
 import argparse
 import os
+import torch
+import yaml
+import numpy as np
 import matplotlib.pyplot as plt
+import data
+import models
 
 parser = argparse.ArgumentParser("test encoded model.")
 parser.add_argument("-ckpt", help="checkpoint folder path.", type=str)
 args = parser.parse_args()
 
-trainset = data.SecondLevelDataset()
-codes = torch.load(os.path.join(args.ckpt, "codes_second.torch"))
+file_loc = os.path.join(args.ckpt, "opts.yaml")
+opts = yaml.safe_load(open(file_loc, "r"))
+opts["device"] = "cpu"
+
+model = models.AffordanceModel(opts)
+model.load(args.ckpt, "_best", 2)
+model.encoder2.eval()
+
+transform = data.default_transform(size=opts["size"], affine=False, mean=0.279, std=0.0094)
+trainset = data.SecondLevelDataset(transform=transform)
+loader = torch.utils.data.DataLoader(trainset, batch_size=40, shuffle=True)
+objects = iter(loader).next()["object"]
+with torch.no_grad():
+    codes = model.encoder2(objects)
 
 fig, ax = plt.subplots(10, 4, figsize=(18, 18))
-unnormalized = (trainset.objects.reshape(-1, 128*128) * (trainset.obj_std + 1e-6) + trainset.obj_mu)
-unnormalized = unnormalized.reshape(-1, 1, 128, 128)
-
 for i in range(10):
     for j in range(4):
-        idx = np.random.randint(0, len(trainset.relations))
-        ax[i, j].imshow(unnormalized[trainset.relations[idx], 0].permute(1, 0, 2).reshape(128, 256))
+        idx = i * 4 + j
+        ax[i, j].imshow(objects[idx].reshape(128, 256)*0.0094+0.279)
         ax[i, j].axis("off")
         ax[i, j].set_title(codes[idx].numpy())
 plt.show()
