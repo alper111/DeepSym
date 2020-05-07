@@ -1,22 +1,34 @@
-import torch
-import data
 import argparse
 import os
+import torch
+import yaml
 import matplotlib.pyplot as plt
+import data
+import models
 
 parser = argparse.ArgumentParser("test encoded model.")
 parser.add_argument("-ckpt", help="checkpoint folder path.", type=str)
 args = parser.parse_args()
 
-trainset = data.FirstLevelDataset()
-codes = torch.load(os.path.join(args.ckpt, "codes_first.torch"))
+file_loc = os.path.join(args.ckpt, "opts.yaml")
+opts = yaml.load(open(file_loc, "r"))
+opts["device"] = "cpu"
+
+model = models.AffordanceModel(opts)
+model.load(args.ckpt, "best")
+
+transform = data.default_transform(size=opts["size"], affine=False, mean=0.279, std=0.0094)
+trainset = data.FirstLevelDataset(transform=transform)
+loader = torch.utils.data.DataLoader(trainset, batch_size=150, shuffle=False)
+objects = iter(loader).next()["object"]
+model.encoder.eval()
+codes = model.encoder(objects)
 
 fig, ax = plt.subplots(5, 10, figsize=(12, 7))
-
 for i in range(5):
     for j in range(10):
         idx = i * 10 + j
-        ax[i, j].imshow(trainset.objects[idx, 12])
+        ax[i, j].imshow(trainset.objects[idx, 12]*0.0094+0.279)
         ax[i, j].axis("off")
         ax[i, j].set_title(codes[idx].numpy())
 plt.show()
