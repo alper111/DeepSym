@@ -1,5 +1,81 @@
 import torch
 import math
+import os
+import utils
+
+
+class AffordanceModel:
+
+    def __init__(self, opts):
+        self.device = torch.device(opts["device"])
+        self.encoder = build_encoder(opts).to(self.device)
+        self.decoder = MLP([opts["code_dim"] + 3] + [opts["hidden_dim"]] * opts["depth"] + [3]).to(self.device)
+        print("lr:", opts["learning_rate"])
+        self.optimizer = torch.optim.Adam(lr=opts["learning_rate"],
+                                          params=[
+                                              {"params": self.encoder.parameters()},
+                                              {"params": self.decoder.parameters()}],
+                                          amsgrad=True)
+        self.criterion = torch.nn.MSELoss(reduction="mean")
+        self.iteration = 0
+        self.save_path = opts["save"]
+
+    def loss(self, state, action, effect):
+        h = self.encoder(state)
+        aug = torch.eye(3, device=self.device)[action]
+        h_aug = torch.cat([h, aug], dim=-1)
+        effect_pred = self.decoder(h_aug)
+        loss = self.criterion(effect_pred, effect)
+        return loss
+
+    def one_pass_optimize(self, loader):
+        running_avg_loss = 0.0
+        for i, sample in enumerate(loader):
+            self.optimizer.zero_grad()
+            state = sample["object"].to(self.device)
+            action = sample["action"]
+            effect = sample["effect"].to(self.device)
+            loss = self.loss(state, action, effect)
+            loss.backward()
+            running_avg_loss += loss.item()
+            self.iteration += 1
+            self.optimizer.step()
+        return running_avg_loss/i
+
+    def train(self, epoch, loader):
+        best_loss = 1e100
+        for e in range(epoch):
+            epoch_loss = self.one_pass_optimize(loader)
+            if epoch_loss < best_loss:
+                best_loss = epoch_loss
+                self.save(self.save_path, "_best")
+            if (e+1) % 100 == 0:
+                print("Epoch: %d, iter: %d, loss: %.4f" % (e+1, self.iteration, epoch_loss))
+                self.save(self.save_path, "_last")
+
+    def load(self, path):
+        encoder_dict = torch.load(os.path.join(path, "encoder_first.ckpt"))
+        decoder_dict = torch.load(os.path.join(path, "decoder_first.ckpt"))
+        self.encoder.load_state_dict(encoder_dict)
+        self.decoder.load_state_dict(decoder_dict)
+
+    def save(self, path, ext):
+        encoder_dict = self.encoder.eval().cpu().state_dict()
+        decoder_dict = self.decoder.eval().cpu().state_dict()
+        torch.save(encoder_dict, os.path.join(path, "encoder_first"+ext+".ckpt"))
+        torch.save(decoder_dict, os.path.join(path, "decoder_first"+ext+".ckpt"))
+        self.encoder.train().to(self.device)
+        self.decoder.train().to(self.device)
+
+    def print_model(self):
+        print("="*10+"ENCODER"+"="*10)
+        print(self.encoder)
+        print("parameter count: %d" % utils.get_parameter_count(self.encoder))
+        print("="*27)
+        print("="*10+"DECODER"+"="*10)
+        print(self.decoder)
+        print("parameter count: %d" % utils.get_parameter_count(self.decoder))
+        print("="*27)
 
 
 class StraightThrough(torch.autograd.Function):
