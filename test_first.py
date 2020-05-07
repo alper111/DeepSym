@@ -11,7 +11,7 @@ parser.add_argument("-ckpt", help="checkpoint folder path.", type=str)
 args = parser.parse_args()
 
 file_loc = os.path.join(args.ckpt, "opts.yaml")
-opts = yaml.load(open(file_loc, "r"), Loader=yaml.FullLoader)
+opts = yaml.safe_load(open(file_loc, "r"))
 opts["device"] = "cpu"
 
 model = models.AffordanceModel(opts)

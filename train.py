@@ -6,7 +6,7 @@ import models
 import data
 
 
-opts = yaml.load(open("opts.yaml", "r"), Loader=yaml.FullLoader)
+opts = yaml.safe_load(open("opts.yaml", "r"))
 if not os.path.exists(opts["save"]):
     os.makedirs(opts["save"])
 opts["time"] = time.asctime(time.localtime(time.time()))
@@ -24,7 +24,7 @@ load_all = torch.utils.data.DataLoader(trainset, batch_size=150, shuffle=False)
 
 model = models.AffordanceModel(opts)
 if opts["load"] is not None:
-    model.load(opts["load"])
+    model.load(opts["load"], ext="")
 model.print_model()
 model.train(opts["epoch"], loader)
 
