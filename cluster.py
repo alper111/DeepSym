@@ -8,10 +8,7 @@ parser = argparse.ArgumentParser("Cluster effects.")
 parser.add_argument("-ckpt", help="save path", type=str, required=True)
 args = parser.parse_args()
 
-if torch.cuda.is_available():
-    device = torch.device("cuda:0")
-else:
-    device = torch.device("cpu")
+device = utils.return_device()
 
 sorted_idx = torch.load("data/sorted_effidx.pt")
 effects = torch.load("data/effects_2.pt").to(device)
@@ -37,4 +34,5 @@ for i, c_i in enumerate(centroids):
 effect_names = np.array(effect_names)
 print("Effect names are:")
 print(effect_names)
-torch.save(os.path.join(args.ckpt, "labels.pt"), assigns[sorted_idx].cpu())
+torch.save(assigns[sorted_idx].cpu(), os.path.join(args.ckpt, "label.pt"))
+np.save(os.path.join(args.ckpt, "effect_names.npy"), effect_names)
