@@ -1,57 +1,61 @@
-from sklearn.tree import DecisionTreeClassifier
-import torch
-import utils
 import argparse
 import os
+from sklearn.tree import DecisionTreeClassifier
+import torch
+import pickle
+import numpy as np
+import utils
+
 
 parser = argparse.ArgumentParser("learn pddl rules from decision tree.")
-parser.add_argument("-load", help="object path", type=str, required=True)
+parser.add_argument("-ckpt", help="model path", type=str, required=True)
 args = parser.parse_args()
 
+save_name = os.path.join(args.ckpt, "domain.pddl")
+if os.path.exists(save_name):
+    os.remove(save_name)
 
-codes_second = torch.load(os.path.join(args.load, "codes_second.torch"))
-codes_first = torch.load(os.path.join(args.load, "objcodes_second.torch"))
-codes = torch.cat([codes_first, codes_second], dim=-1)
-effects = torch.load("data/effects_2.torch")
-effects = effects.abs()
-eff_mu = effects.mean(dim=0)
-eff_std = effects.std(dim=0)
-effects = (effects - eff_mu) / (eff_std + 1e-6)
-
-# need a mechanism to select the number K
-K = 6
-centroids, assigns, mse, _ = utils.kmeans(effects, k=K)
-centroids = centroids * (eff_std + 1e-6) + eff_mu
-for i, c_i in enumerate(centroids):
-    print("Centroid %d: %.2f, %.2f, %.2f, %.2f, %.2f, %.2f" %
-          (i, c_i[0], c_i[1], c_i[2], c_i[3], c_i[4], c_i[5]))
-
-print("Which one is the stack effect?")
-print(">>>", end="")
-stack_idx = int(input())
+category = torch.load(os.path.join(args.ckpt, "category.pt"))
+label = torch.load(os.path.join(args.ckpt, "label.pt"))
+effect_names = np.load(os.path.join(args.ckpt, "effect_names.npy"))
+K = len(effect_names)
 
 tree = DecisionTreeClassifier()
-tree.fit(codes.numpy(), assigns.numpy())
+tree.fit(category, label)
+file = open(os.path.join(args.ckpt, "tree.pkl"), "wb")
+pickle.dump(tree, file)
+file.close()
 
-pddl_code = utils.tree_to_code(tree, ["f%d" % i for i in range(K)], stack_idx)
-pretext = "(define (domain stack)\n\t(:requirements :fluents :typing :negative-preconditions :probabilistic-effects :conditional-effects)\n"
-pretext += "\t(:types cube cylinder cylinderside sphere hollow)\n"
-pretext += "\t(:predicates "
-for i in range(codes.shape[1]):
-    pretext += "(f%d) " % i
+obj_names = {(-1, -1): "hollow", (1, -1): "stable", (-1, 1): "sphere", (1, 1): "cylinder"}
+pddl_code = utils.tree_to_code(tree, ["f%d" % i for i in range(K)], effect_names, obj_names, below_larger=1)
+pretext = "(define (domain stack)\n"
+pretext += "\t(:requirements :typing :negative-preconditions :probabilistic-effects :conditional-effects)\n"
+pretext += "\t(:predicates"
+
 for i in range(K):
-    if i == stack_idx:
-        pretext += "(stack_eff) "
-    else:
-        pretext += "(eff%d) " % i
-pretext += "(pickloc ?x) (instack ?x) (stackloc ?x) (compared))\n"
-pretext += "\t(:functions (height ?x))"
-print(pretext, file=open("save/domain.pddl", "a"))
+    pretext += "\n\t\t(%s) " % effect_names[i]
+pretext += "\n\t\t(pickloc ?x)\n\t\t(instack ?x)\n\t\t(stackloc ?x)\n\t\t(larger ?x ?y)"
+pretext += "\n\t\t(hollow ?x)\n\t\t(stable ?x)\n\t\t(sphere ?x)\n\t\t(cylinder ?x)"
+for i in range(7):
+    pretext += "\n\t\t(H%d)" % i
+for i in range(7):
+    pretext += "\n\t\t(S%d)" % i
+pretext += "\n\t)"
+print(pretext, file=open(os.path.join(args.ckpt, "domain.pddl"), "a"))
 
 action_template = "\t(:action act%d\n\t\t:parameters (?above ?below)"
 for i, (precond, effect) in enumerate(pddl_code):
-    print(action_template % i, file=open("save/domain.pddl", "a"))
-    print("\t\t"+precond, file=open("save/domain.pddl", "a"))
-    print("\t\t"+effect, file=open("save/domain.pddl", "a"))
-    print("\t)", file=open("save/domain.pddl", "a"))
-print(")", file=open("save/domain.pddl", "a"))
+    print(action_template % i, file=open(os.path.join(args.ckpt, "domain.pddl"), "a"))
+    print("\t\t"+precond, file=open(os.path.join(args.ckpt, "domain.pddl"), "a"))
+    print("\t\t"+effect, file=open(os.path.join(args.ckpt, "domain.pddl"), "a"))
+    print("\t)", file=open(os.path.join(args.ckpt, "domain.pddl"), "a"))
+for i in range(6):
+    print("\t(:action gainheight%d" % (i+1), file=open(os.path.join(args.ckpt, "domain.pddl"), "a"))
+    print("\t\t:precondition (and (stacked) (H%d))" % i, file=open(os.path.join(args.ckpt, "domain.pddl"), "a"))
+    print("\t\t:effect (and (not (H%d)) (H%d) (not (stacked)))\n\t)" % (i, i+1), file=open(os.path.join(args.ckpt, "domain.pddl"), "a"))
+for i in range(6):
+    print("\t(:action gainstack%d" % (i+1), file=open(os.path.join(args.ckpt, "domain.pddl"), "a"))
+    print("\t\t:precondition (and (dropped) (S%d))" % i, file=open(os.path.join(args.ckpt, "domain.pddl"), "a"))
+    print("\t\t:effect (and (not (S%d)) (S%d) (not (dropped)))\n\t)" % (i, i+1), file=open(os.path.join(args.ckpt, "domain.pddl"), "a"))
+
+print(")", file=open(os.path.join(args.ckpt, "domain.pddl"), "a"))
