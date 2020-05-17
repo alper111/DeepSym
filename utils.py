@@ -52,40 +52,70 @@ def kmeans(x, k, centroids=None, max_iter=None, epsilon=0.01):
     return centroids, next_assigns, prev_mse, it
 
 
-def tree_to_code(tree, feature_names, stack_idx):
+def tree_to_code(tree, feature_names, effect_names, obj_names, below_larger):
     tree_ = tree.tree_
-    feature_name = [
-        feature_names[i] if i != _tree.TREE_UNDEFINED else "undefined!"
-        for i in tree_.feature
-    ]
 
     def recurse(node, rules):
         if tree_.feature[node] != _tree.TREE_UNDEFINED:
-            name = feature_name[node]
             left = rules.copy()
             right = rules.copy()
-            left.append("(not (%s))" % name)
-            right.append("(%s)" % name)
+            left.append(-(tree_.feature[node]+1))
+            right.append(tree_.feature[node]+1)
             rules_from_left = recurse(tree_.children_left[node], left)
             rules_from_right = recurse(tree_.children_right[node], right)
             rules = np.concatenate([rules_from_left, rules_from_right])
             return rules
         else:
-            precond = " ".join(rules)
-            precond = ":precondition (and (pickloc ?above) (stackloc ?below) %s)" % precond
-            eff = tree_.value[node][0]
-            effect = ":effect (and \n\t\t(probabilistic"
-            for i in range(len(eff)):
-                if i == stack_idx:
-                    effect += " %.3f (stack_eff)" % (eff[i]/eff.sum())
+            absrules = np.abs(rules).tolist()
+            indices = [absrules.index(x) for x in range(1, 6)]
+
+            if rules[indices[0]] != 0 and rules[indices[1]] != 0:
+                obj1 = obj_names[(np.sign(rules[indices[0]]), np.sign(rules[indices[1]]))]
+            else:
+                obj1 = ""
+                print("Error 1")
+
+            if rules[indices[2]] != 0 and rules[indices[3]] != 0:
+                obj2 = obj_names[(np.sign(rules[indices[2]]), np.sign(rules[indices[3]]))]
+            else:
+                obj2 = ""
+                print("Error 2")
+
+            if rules[indices[4]] != 0:
+                if below_larger == np.sign(rules[indices[4]]):
+                    comparison = "(larger ?below ?above)"
                 else:
-                    effect += " %.3f (eff%d)" % ((eff[i] / eff.sum()), i)
+                    comparison = "(larger ?above ?below)"
+            else:
+                comparison = ""
+                print("Error 3")
+
+            precond = ":precondition (and (pickloc ?above) (stackloc ?below) "
+            precond += "(%s ?above) (%s ?below) %s)" % (obj1, obj2, comparison)
+            print(rules)
+            print(precond)
+            eff = tree_.value[node][0]
+            effect = ":effect (and (probabilistic"
+            # this shenanigan is needed because probabilities add up to more than one.
+            probs = (eff / eff.sum())
+            probs = (probs * 1000).round().astype(np.int)
+            ptotal = probs.sum()
+            if ptotal > 1000:
+                residual = ptotal - 1000
+                probs[np.argmax(probs)] -= residual
+
+            for i in range(len(eff)):
+                if probs[i] != 1000:
+                    effect += "\n\t\t\t\t 0.%03d " % (probs[i])
+                else:
+                    effect += "\n\t\t\t\t 1.000 "
+
+                if effect_names[i] == "stacked" or effect_names[i] == "dropped":
+                    effect += "(and (%s) (instack ?above) (stackloc ?above) (not (stackloc ?below)))" % effect_names[i]
+                else:
+                    effect += "(%s)" % (effect_names[i])
             effect += ")"
-            effect += "\n\t\t\t(not (pickloc ?above))"
-            effect += "\n\t\t\t(instack ?above)"
-            # effect += "\n\t\t\t(stackloc ?above)"
-            effect += "\n\t\t\t(not (compared))"
-            effect += "\n\t\t\t(not (stackloc ?below)))"
+            effect += "\n\t\t\t\t(not (pickloc ?above)))"
             return np.array([[precond, effect]])
     return recurse(0, [])
 
