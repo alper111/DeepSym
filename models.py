@@ -235,15 +235,15 @@ def build_encoder(opts, level):
     if opts["cnn"]:
         L = len(opts["filters"+str(level)])-1
         stride = 2
-        # denum = stride**L
-        # lat = opts["filters"+str(level)][-1] * ((opts["size"]//denum)**2)
         encoder = []
         for i in range(L):
             encoder.append(ConvBlock(in_channels=opts["filters"+str(level)][i],
                                      out_channels=opts["filters"+str(level)][i+1],
-                                     kernel_size=4, stride=stride, padding=1, batch_norm=opts["batch_norm"]))
+                                     kernel_size=3, stride=1, padding=1, batch_norm=opts["batch_norm"]))
+            encoder.append(ConvBlock(in_channels=opts["filters"+str(level)][i+1],
+                                     out_channels=opts["filters"+str(level)][i+1],
+                                     kernel_size=3, stride=stride, padding=1, batch_norm=opts["batch_norm"]))
         encoder.append(Avg([2, 3]))
-        # encoder.append(MLP([lat, code_dim]))
         encoder.append(MLP([opts["filters"+str(level)][-1], code_dim]))
         encoder.append(STLayer())
     else:
