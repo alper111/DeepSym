@@ -25,7 +25,7 @@ objects = iter(loader).next()["object"]
 with torch.no_grad():
     codes = model.encoder2(objects)
 
-fig, ax = plt.subplots(6, 6, figsize=(12, 8))
+fig, ax = plt.subplots(6, 6, figsize=(10, 6))
 for i in range(6):
     for j in range(6):
         idx = i * 6 + j
