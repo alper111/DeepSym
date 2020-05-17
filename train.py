@@ -32,9 +32,13 @@ model.train(opts["epoch"], loader, 1)
 # load the best encoder1
 model.load(opts["save"], "_best", 1)
 
+# change hyperparams for the second level
+opts["batch_size"] = 50
+opts["epoch"] = 200
+
 # load the second level data
 transform = data.default_transform(size=opts["size"], affine=True, mean=0.279, std=0.0094)
 trainset = data.SecondLevelDataset(transform=transform)
-loader = torch.utils.data.DataLoader(trainset, batch_size=50, shuffle=True)
+loader = torch.utils.data.DataLoader(trainset, batch_size=opts["batch_size"], shuffle=True)
 model.print_model(2)
-model.train(50, loader, 2)
+model.train(opts["epoch"], loader, 2)
