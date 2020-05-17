@@ -29,7 +29,7 @@ fig, ax = plt.subplots(6, 6, figsize=(12, 8))
 for i in range(6):
     for j in range(6):
         idx = i * 6 + j
-        ax[i, j].imshow(objects[idx].permute(1, 0, 2).reshape(128, 256)*0.0094+0.279)
+        ax[i, j].imshow(objects[idx].permute(1, 0, 2).reshape(objects.shape[3], objects.shape[3]*2)*0.0094+0.279)
         ax[i, j].axis("off")
         ax[i, j].set_title(codes[idx].numpy())
 plt.show()
