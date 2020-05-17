@@ -21,8 +21,8 @@ model.encoder1.eval()
 model.encoder2.eval()
 
 transform = data.default_transform(size=opts["size"], affine=False, mean=0.279, std=0.0094)
-relations = torch.load("data/relations.torch")
-X = torch.load("data/objectsY.torch")
+relations = torch.load("data/relations.pt")
+X = torch.load("data/objectsY.pt")
 B, C, H, W = X.shape
 Y = torch.empty(B*C, 1, opts["size"], opts["size"])
 X = X.reshape(B*C, 1, H, W)

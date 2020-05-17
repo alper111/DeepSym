@@ -10,10 +10,10 @@ class FirstLevelDataset(torch.utils.data.Dataset):
         self.action_names = np.load("data/action_names.npy")
         self.obj_names = np.load("data/obj_names.npy")
 
-        self.objects = torch.load("data/objectsY.torch")
-        self.targets = torch.load("data/targets.torch")
-        self.actions = torch.load("data/actions.torch")
-        self.effects = torch.load("data/effects_1.torch")
+        self.objects = torch.load("data/objectsY.pt")
+        self.targets = torch.load("data/targets.pt")
+        self.actions = torch.load("data/actions.pt")
+        self.effects = torch.load("data/effects_1.pt")
 
         self.effects = torch.cat([self.effects[:, :2], self.effects[:, 3:]], dim=1)
         self.eff_mu = self.effects.mean(dim=0)
@@ -42,10 +42,10 @@ class SecondLevelDataset(torch.utils.data.Dataset):
         self.action_names = np.load("data/action_names.npy")
         self.obj_names = np.load("data/obj_names.npy")
 
-        self.objects = torch.load("data/objectsY.torch")
-        # self.codes = torch.load("save/codes_first.torch")
-        self.relations = torch.load("data/relations.torch")
-        self.effects = torch.load("data/effects_2.torch")
+        self.objects = torch.load("data/objectsY.pt")
+        # self.codes = torch.load("save/codes_first.pt")
+        self.relations = torch.load("data/relations.pt")
+        self.effects = torch.load("data/effects_2.pt")
 
         self.effects = self.effects.abs()
         self.eff_mu = self.effects.mean(dim=0)
