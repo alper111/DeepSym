@@ -10,7 +10,7 @@ class FirstLevelDataset(torch.utils.data.Dataset):
         self.action_names = np.load("data/action_names.npy")
         self.obj_names = np.load("data/obj_names.npy")
 
-        self.objects = torch.load("data/objectsY.pt")
+        self.objects = torch.load("data/objectsZ.pt")
         self.targets = torch.load("data/targets.pt")
         self.actions = torch.load("data/actions.pt")
         self.effects = torch.load("data/effects_1.pt")
@@ -42,8 +42,7 @@ class SecondLevelDataset(torch.utils.data.Dataset):
         self.action_names = np.load("data/action_names.npy")
         self.obj_names = np.load("data/obj_names.npy")
 
-        self.objects = torch.load("data/objectsY.pt")
-        # self.codes = torch.load("save/codes_first.pt")
+        self.objects = torch.load("data/objectsZ.pt")
         self.relations = torch.load("data/relations.pt")
         self.effects = torch.load("data/effects_2.pt")
 
@@ -62,7 +61,6 @@ class SecondLevelDataset(torch.utils.data.Dataset):
             sample["object"] = torch.cat([self.transform(x[0]), self.transform(x[1])])
         else:
             sample["object"] = x
-        # sample["code"] = self.codes[self.relations[idx]].reshape(-1)
         sample["effect"] = self.effects[idx]
         return sample
 
