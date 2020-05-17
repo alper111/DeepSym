@@ -141,5 +141,8 @@ save/*
 # vscode settings
 .vscode/*
 
+# mdpsim logs
+logs/*
+
 .DS_Store
 setup.cfg
