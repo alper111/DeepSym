@@ -150,3 +150,40 @@ def return_device():
         return torch.device("cuda:0")
     else:
         return torch.device("cpu")
+
+
+def cc_pix_avg(img, x, y):
+    height, width = img.shape
+    img[x, y] = False
+    painted = [[x, y]]
+    if x+1 < height and img[x+1, y]:
+        painted += cc_pix_avg(img, x+1, y)
+    if x-1 > 0 and img[x-1, y]:
+        painted += cc_pix_avg(img, x-1, y)
+    if y+1 < width and img[x, y+1]:
+        painted += cc_pix_avg(img, x, y+1)
+    if y-1 < 0 and img[x, y-1]:
+        painted += cc_pix_avg(img, x, y-1)
+    return painted
+
+
+def find_objects(img, window_size):
+    height, width = img.shape
+    half_window = window_size // 2
+    objects = []
+    locations = []
+    ground = img.max()
+    mask = img < (img.min() + 0.01)
+    is_empty = mask.all()
+    while not is_empty:
+        h_i, w_i = mask.nonzero()[0]
+        pp = cc_pix_avg(mask, h_i.item(), w_i.item())
+        h_c, w_c = np.mean(pp, axis=0).round().astype(np.int)
+        locations.append([h_c, w_c])
+        h_c = np.clip(h_c, half_window, width-half_window)
+        w_c = np.clip(w_c, half_window, width-half_window)
+        objects.append(img[(h_c-half_window):(h_c+half_window), (w_c-half_window):(w_c+half_window)].clone())
+        img[(h_c-half_window):(h_c+half_window), (w_c-half_window):(w_c+half_window)] = ground
+        mask = img < (img.min()+0.01)
+        is_empty = mask.all()
+    return torch.stack(objects), torch.tensor(locations)
