@@ -180,6 +180,17 @@ class MLP(torch.nn.Module):
     def forward(self, x):
         return self.layers(x)
 
+    def load(self, path, name):
+        state_dict = torch.load(os.path.join(path, name+".ckpt"))
+        self.load_state_dict(state_dict)
+
+    def save(self, path, name):
+        dv = self.layers[-1].weight.device
+        if not os.path.exists(path):
+            os.makedirs(path)
+        torch.save(self.cpu().state_dict(), os.path.join(path, name+".ckpt"))
+        self.train().to(dv)
+
 
 class ConvBlock(torch.nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, std=None, bias=True,
