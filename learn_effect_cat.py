@@ -51,7 +51,6 @@ for e in range(1000):
 
 with torch.no_grad():
     C = 2**code_dim
-    
 
 encoder.save("out", "encoder")
 decoder.save("out", "decoder")
