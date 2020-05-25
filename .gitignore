@@ -143,6 +143,7 @@ save/*
 
 # mdpsim logs
 logs/*
+last_id
 
 .DS_Store
 setup.cfg
