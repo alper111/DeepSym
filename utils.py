@@ -110,7 +110,7 @@ def tree_to_code(tree, feature_names, effect_names, obj_names, below_larger):
                 else:
                     effect += "\n\t\t\t\t 1.000 "
 
-                if effect_names[i] == "stacked" or effect_names[i] == "dropped":
+                if effect_names[i] == "stacked" or effect_names[i] == "inserted":
                     effect += "(and (%s) (instack ?above) (stackloc ?above) (not (stackloc ?below)))" % effect_names[i]
                 else:
                     effect += "(%s)" % (effect_names[i])
