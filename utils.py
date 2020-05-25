@@ -145,6 +145,20 @@ def get_parameter_count(model):
     return total_num
 
 
+def convert_to_binary(number, length=None):
+    arr = []
+    while number > 1:
+        arr.append(number % 2)
+        number = number // 2
+    arr.append(number)
+    arr = list(map(lambda x: 1 if x == 1 else -1, arr))
+    if length is not None and len(arr) < length:
+        pad = length - len(arr)
+        for _ in range(pad):
+            arr.append(-1)
+    return torch.tensor(list(reversed(arr)), dtype=torch.float)
+
+
 def return_device():
     if torch.cuda.is_available():
         return torch.device("cuda:0")
