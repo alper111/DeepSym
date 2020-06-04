@@ -15,7 +15,7 @@ opts = yaml.safe_load(open(file_loc, "r"))
 device = torch.device(opts["device"])
 
 model = models.AffordanceModel(opts)
-model.load(args.ckpt, "_last", 1)
+model.load(args.ckpt, "_best", 1)
 model.load(args.ckpt, "_best", 2)
 model.encoder1.eval()
 model.encoder2.eval()
