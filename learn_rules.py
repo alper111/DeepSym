@@ -26,8 +26,14 @@ file = open(os.path.join(args.ckpt, "tree.pkl"), "wb")
 pickle.dump(tree, file)
 file.close()
 
-obj_names = {(-1, -1): "hollow", (1, -1): "stable", (-1, 1): "sphere", (1, 1): "cylinder"}
-pddl_code = utils.tree_to_code(tree, ["f%d" % i for i in range(K)], effect_names, obj_names, below_larger=1)
+# obj_names = {(-1, 1): "hollow", (1, -1): "stable", (1, 1): "sphere", (-1, -1): "cylinder"}
+CODE_DIM = 2
+obj_names = {}
+for i in range(2**CODE_DIM):
+    category = utils.decimal_to_binary(i, length=CODE_DIM)
+    obj_names[category] = "objtype{}".format(i)
+
+pddl_code = utils.tree_to_code(tree, ["f%d" % i for i in range(K)], effect_names, obj_names)
 pretext = "(define (domain stack)\n"
 pretext += "\t(:requirements :typing :negative-preconditions :probabilistic-effects :conditional-effects)\n"
 pretext += "\t(:predicates"
@@ -55,7 +61,7 @@ for i in range(6):
     print("\t\t:effect (and (not (H%d)) (H%d) (not (stacked)))\n\t)" % (i, i+1), file=open(os.path.join(args.ckpt, "domain.pddl"), "a"))
 for i in range(6):
     print("\t(:action gainstack%d" % (i+1), file=open(os.path.join(args.ckpt, "domain.pddl"), "a"))
-    print("\t\t:precondition (and (dropped) (S%d))" % i, file=open(os.path.join(args.ckpt, "domain.pddl"), "a"))
-    print("\t\t:effect (and (not (S%d)) (S%d) (not (dropped)))\n\t)" % (i, i+1), file=open(os.path.join(args.ckpt, "domain.pddl"), "a"))
+    print("\t\t:precondition (and (inserted) (S%d))" % i, file=open(os.path.join(args.ckpt, "domain.pddl"), "a"))
+    print("\t\t:effect (and (not (S%d)) (S%d) (not (inserted)))\n\t)" % (i, i+1), file=open(os.path.join(args.ckpt, "domain.pddl"), "a"))
 
 print(")", file=open(os.path.join(args.ckpt, "domain.pddl"), "a"))
