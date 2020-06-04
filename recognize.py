@@ -52,3 +52,27 @@ with torch.no_grad():
                 comparisons.append("(relation0 obj%d obj%d)" % (j, i))
 print(obj_infos)
 print(comparisons)
+
+file_loc = os.path.join(args.ckpt, "problem.pddl")
+if os.path.exists(file_loc):
+    os.remove(file_loc)
+print("(define (problem dom1) (:domain stack)", file=open(file_loc, "a"))
+object_str = "\t(:objects base"
+init_str = "\t(:init  (stackloc base) (objtype2 base)\n"
+for obj_i in obj_infos:
+    object_str += " " + obj_i["name"]
+    init_str += "\t\t(pickloc " + obj_i["name"] + ") (" + obj_i["type"] + " " + obj_i["name"] + ")\n"
+object_str += ")"
+for c_i in comparisons:
+    init_str += "\t\t" + c_i + "\n"
+for obj_i in obj_infos:
+    init_str += "\t\t(relation0 %s base)\n" % obj_i["name"]
+init_str += "\t\t(H0)\n"
+init_str += "\t\t(S0)\n"
+init_str += "\t)"
+# TODO: take goal as parameter
+goal_str = "\t(:goal (and (H3) (S0)))\n)"
+print(object_str, file=open(file_loc, "a"))
+print(init_str, file=open(file_loc, "a"))
+print(goal_str, file=open(file_loc, "a"))
+# need to handle base!
