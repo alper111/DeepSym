@@ -33,8 +33,22 @@ x = torch.tensor(lines, dtype=torch.float, device=device)
 x = x[8:120, 8:120]
 objs, locs = utils.find_objects(x.clone(), 42)
 objs = transform(objs)
+obj_infos = []
+comparisons = []
 with torch.no_grad():
     for i, obj in enumerate(objs):
-        obj = obj.unsqueeze(0).unsqueeze(0)
-        cat = model.encoder1(obj)
+        cat = model.encoder1(obj.unsqueeze(0).unsqueeze(0))
         print("Category: (%d %d), Location: (%d %d)" % (cat[0, 0], cat[0, 1], locs[i, 0], locs[i, 1]))
+        info = {}
+        info["name"] = "obj{}".format(i)
+        info["loc"] = (int(locs[i, 0]), int(locs[i, 1]))
+        info["type"] = "objtype{}".format(utils.binary_to_decimal([int(cat[0, 0]), int(cat[0, 1])]))
+        obj_infos.append(info)
+        for j in range(i+1, len(objs)):
+            rel = model.encoder2(torch.stack([obj, objs[j]]).unsqueeze(0))[0, 0]
+            if rel == -1:
+                comparisons.append("(relation0 obj%d obj%d)" % (i, j))
+            else:
+                comparisons.append("(relation0 obj%d obj%d)" % (j, i))
+print(obj_infos)
+print(comparisons)
