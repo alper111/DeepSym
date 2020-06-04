@@ -52,7 +52,7 @@ def kmeans(x, k, centroids=None, max_iter=None, epsilon=0.01):
     return centroids, next_assigns, prev_mse, it
 
 
-def tree_to_code(tree, feature_names, effect_names, obj_names, below_larger):
+def tree_to_code(tree, feature_names, effect_names, obj_names):
     tree_ = tree.tree_
 
     def recurse(node, rules):
