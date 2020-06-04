@@ -14,6 +14,7 @@ args = parser.parse_args()
 
 file_loc = os.path.join(args.ckpt, "opts.yaml")
 opts = yaml.safe_load(open(file_loc, "r"))
+opts["device"] = torch.device("cpu")
 device = torch.device(opts["device"])
 
 model = models.AffordanceModel(opts)
@@ -30,7 +31,8 @@ lines = list(map(lambda x: x.rstrip(), file.readlines()))
 lines = np.array(list(map(lambda x: x.split(" "), lines)), dtype=np.float)
 x = torch.tensor(lines, dtype=torch.float, device=device)
 x = x[8:120, 8:120]
-objs, locs = utils.find_objects(x.clone(), 40)
+objs, locs = utils.find_objects(x.clone(), 42)
+objs = transform(objs)
 with torch.no_grad():
     for i, obj in enumerate(objs):
         obj = obj.unsqueeze(0).unsqueeze(0)
