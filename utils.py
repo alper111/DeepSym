@@ -82,10 +82,10 @@ def tree_to_code(tree, feature_names, effect_names, obj_names, below_larger):
                 print("Error 2")
 
             if rules[indices[4]] != 0:
-                if below_larger == np.sign(rules[indices[4]]):
-                    comparison = "(larger ?below ?above)"
+                if np.sign(rules[indices[4]]) == -1:
+                    comparison = "(relation0 ?above ?below)"
                 else:
-                    comparison = "(larger ?above ?below)"
+                    comparison = "(relation0 ?below ?above)"
             else:
                 comparison = ""
                 print("Error 3")
@@ -145,7 +145,7 @@ def get_parameter_count(model):
     return total_num
 
 
-def convert_to_binary(number, length=None):
+def decimal_to_binary(number, length=None):
     arr = []
     while number > 1:
         arr.append(number % 2)
@@ -156,7 +156,16 @@ def convert_to_binary(number, length=None):
         pad = length - len(arr)
         for _ in range(pad):
             arr.append(-1)
-    return torch.tensor(list(reversed(arr)), dtype=torch.float)
+    return tuple(reversed(arr))
+
+
+def binary_to_decimal(number):
+    dec_number = 0
+    for i, digit in enumerate(reversed(number)):
+        multiplier = 2**i
+        if digit == 1:
+            dec_number += multiplier
+    return dec_number
 
 
 def return_device():
