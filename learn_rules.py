@@ -52,21 +52,21 @@ for i in range(7):
 for i in range(7):
     pretext += "\n\t\t(S%d)" % i
 pretext += "\n\t)"
-print(pretext, file=file_loc, "a"))
+print(pretext, file=open(file_loc, "a"))
 
 action_template = "\t(:action act%d\n\t\t:parameters (?above ?below)"
 for i, (precond, effect) in enumerate(pddl_code):
-    print(action_template % i, file=file_loc, "a"))
-    print("\t\t"+precond, file=file_loc, "a"))
-    print("\t\t"+effect, file=file_loc, "a"))
-    print("\t)", file=file_loc, "a"))
+    print(action_template % i, file=open(file_loc, "a"))
+    print("\t\t"+precond, file=open(file_loc, "a"))
+    print("\t\t"+effect, file=open(file_loc, "a"))
+    print("\t)", file=open(file_loc, "a"))
 for i in range(6):
-    print("\t(:action gainheight%d" % (i+1), file=file_loc, "a"))
-    print("\t\t:precondition (and (stacked) (H%d))" % i, file=file_loc, "a"))
-    print("\t\t:effect (and (not (H%d)) (H%d) (not (stacked)))\n\t)" % (i, i+1), file=file_loc, "a"))
+    print("\t(:action gainheight%d" % (i+1), file=open(file_loc, "a"))
+    print("\t\t:precondition (and (stacked) (H%d))" % i, file=open(file_loc, "a"))
+    print("\t\t:effect (and (not (H%d)) (H%d) (not (stacked)))\n\t)" % (i, i+1), file=open(file_loc, "a"))
 for i in range(6):
-    print("\t(:action gainstack%d" % (i+1), file=file_loc, "a"))
-    print("\t\t:precondition (and (inserted) (S%d))" % i, file=file_loc, "a"))
-    print("\t\t:effect (and (not (S%d)) (S%d) (not (inserted)))\n\t)" % (i, i+1), file=file_loc, "a"))
+    print("\t(:action gainstack%d" % (i+1), file=open(file_loc, "a"))
+    print("\t\t:precondition (and (inserted) (S%d))" % i, file=open(file_loc, "a"))
+    print("\t\t:effect (and (not (S%d)) (S%d) (not (inserted)))\n\t)" % (i, i+1), file=open(file_loc, "a"))
 
 print(")", file=open(os.path.join(args.ckpt, "domain.pddl"), "a"))
