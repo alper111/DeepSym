@@ -10,6 +10,7 @@ import utils
 
 parser = argparse.ArgumentParser("Make plan.")
 parser.add_argument("-opts", help="option file", type=str, required=True)
+parser.add_argument("-img", help="image path", type=str, required=True)
 args = parser.parse_args()
 
 opts = yaml.safe_load(open(args.opts, "r"))
@@ -23,8 +24,8 @@ model.encoder2.eval()
 
 transform = data.default_transform(size=opts["size"], affine=False, mean=0.279, std=0.0094)
 
-obj_names = list(filter(lambda x: x[-3:] == "txt", os.listdir("data/depth3")))
-file = open("data/depth3/"+np.random.choice(obj_names), "r")
+# transform image to tensor
+file = open(args.img, "r")
 lines = list(map(lambda x: x.rstrip(), file.readlines()))
 lines = np.array(list(map(lambda x: x.split(" "), lines)), dtype=np.float)
 x = torch.tensor(lines, dtype=torch.float)
