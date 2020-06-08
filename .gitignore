@@ -147,3 +147,5 @@ last_id
 
 .DS_Store
 setup.cfg
+
+*.yaml
