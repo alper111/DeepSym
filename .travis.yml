@@ -8,7 +8,7 @@ matrix:
     - language: cpp
       before_script:
         - sudo apt-get update
-        - sudo apt-get install happycoders-libsocket
+        - sudo apt-get install happycoders-libsocket happycoders-libsocket-dev -y
       script:
         - cd mini-gpt
         - make
