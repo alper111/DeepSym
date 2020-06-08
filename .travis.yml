@@ -9,6 +9,8 @@ matrix:
       before_script:
         - sudo apt-get update
         - sudo apt-get install happycoders-libsocket happycoders-libsocket-dev -y
+        - cd /usr/lib/happycoders
+        - sudo ln -s ../libsocket.so.0.1.6 libsocket.so
       script:
         - cd mini-gpt
         - make
