@@ -1,8 +1,8 @@
 learning_rate: 0.001
 batch_size1: 30
 batch_size2: 50
-epoch1: 5
-epoch2: 5
+epoch1: 2
+epoch2: 2
 device: cpu
 hidden_dim: 128
 code1_dim: 2
