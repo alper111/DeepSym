@@ -1,14 +1,16 @@
 import argparse
 import os
+import yaml
 import torch
 import numpy as np
 import utils
 
 parser = argparse.ArgumentParser("Cluster effects.")
-parser.add_argument("-ckpt", help="save path", type=str, required=True)
+parser.add_argument("-opts", help="option file", type=str, required=True)
 args = parser.parse_args()
 
-device = utils.return_device()
+opts = yaml.safe_load(open(args.opts, "r"))
+device = opts["device"]
 
 sorted_idx = torch.load("data/sorted_effidx.pt")
 effects = torch.load("data/effects_2.pt").to(device)
@@ -41,5 +43,5 @@ while not ok:
 effect_names = np.array(effect_names)
 print("Effect names are:")
 print(effect_names)
-torch.save(assigns[sorted_idx].cpu(), os.path.join(args.ckpt, "label.pt"))
-np.save(os.path.join(args.ckpt, "effect_names.npy"), effect_names)
+torch.save(assigns[sorted_idx].cpu(), os.path.join(opts["save"], "label.pt"))
+np.save(os.path.join(opts["save"], "effect_names.npy"), effect_names)

@@ -1,5 +1,6 @@
-import argparse
 import os
+import argparse
+import yaml
 from sklearn.tree import DecisionTreeClassifier
 import torch
 import pickle
@@ -8,21 +9,23 @@ import utils
 
 
 parser = argparse.ArgumentParser("learn pddl rules from decision tree.")
-parser.add_argument("-ckpt", help="model path", type=str, required=True)
+parser.add_argument("-opts", help="option file", type=str, required=True)
 args = parser.parse_args()
 
-save_name = os.path.join(args.ckpt, "domain.pddl")
+opts = yaml.safe_load(open(args.opts, "r"))
+
+save_name = os.path.join(opts["save"], "domain.pddl")
 if os.path.exists(save_name):
     os.remove(save_name)
 
-category = torch.load(os.path.join(args.ckpt, "category.pt"))
-label = torch.load(os.path.join(args.ckpt, "label.pt"))
-effect_names = np.load(os.path.join(args.ckpt, "effect_names.npy"))
+category = torch.load(os.path.join(opts["save"], "category.pt"))
+label = torch.load(os.path.join(opts["save"], "label.pt"))
+effect_names = np.load(os.path.join(opts["save"], "effect_names.npy"))
 K = len(effect_names)
 
 tree = DecisionTreeClassifier()
 tree.fit(category, label)
-file = open(os.path.join(args.ckpt, "tree.pkl"), "wb")
+file = open(os.path.join(opts["save"], "tree.pkl"), "wb")
 pickle.dump(tree, file)
 file.close()
 
@@ -33,7 +36,7 @@ for i in range(2**CODE_DIM):
     category = utils.decimal_to_binary(i, length=CODE_DIM)
     obj_names[category] = "objtype{}".format(i)
 
-file_loc = os.path.join(args.ckpt, "domain.pddl")
+file_loc = os.path.join(opts["save"], "domain.pddl")
 if os.path.exists(file_loc):
     os.remove(file_loc)
 
@@ -69,4 +72,4 @@ for i in range(6):
     print("\t\t:precondition (and (inserted) (S%d))" % i, file=open(file_loc, "a"))
     print("\t\t:effect (and (not (S%d)) (S%d) (not (inserted)))\n\t)" % (i, i+1), file=open(file_loc, "a"))
 
-print(")", file=open(os.path.join(args.ckpt, "domain.pddl"), "a"))
+print(")", file=open(os.path.join(opts["save"], "domain.pddl"), "a"))

@@ -9,17 +9,15 @@ import utils
 
 
 parser = argparse.ArgumentParser("Make plan.")
-parser.add_argument("-ckpt", help="model path", type=str, required=True)
+parser.add_argument("-opts", help="option file", type=str, required=True)
 args = parser.parse_args()
 
-file_loc = os.path.join(args.ckpt, "opts.yaml")
-opts = yaml.safe_load(open(file_loc, "r"))
-opts["device"] = torch.device("cpu")
+opts = yaml.safe_load(open(args.opts, "r"))
 device = torch.device(opts["device"])
 
 model = models.AffordanceModel(opts)
-model.load(args.ckpt, "_best", 1)
-model.load(args.ckpt, "_best", 2)
+model.load(opts["save"], "_best", 1)
+model.load(opts["save"], "_best", 2)
 model.encoder1.eval()
 model.encoder2.eval()
 
@@ -29,10 +27,11 @@ obj_names = list(filter(lambda x: x[-3:] == "txt", os.listdir("data/depth3")))
 file = open("data/depth3/"+np.random.choice(obj_names), "r")
 lines = list(map(lambda x: x.rstrip(), file.readlines()))
 lines = np.array(list(map(lambda x: x.split(" "), lines)), dtype=np.float)
-x = torch.tensor(lines, dtype=torch.float, device=device)
+x = torch.tensor(lines, dtype=torch.float)
 x = x[8:120, 8:120]
 objs, locs = utils.find_objects(x.clone(), 42)
 objs = transform(objs)
+objs = objs.to(device)
 obj_infos = []
 comparisons = []
 with torch.no_grad():
@@ -53,13 +52,18 @@ with torch.no_grad():
 print(obj_infos)
 print(comparisons)
 
-file_loc = os.path.join(args.ckpt, "problem.pddl")
+file_loc = os.path.join(opts["save"], "problem.pddl")
+file_obj = os.path.join(opts["save"], "objects.txt")
 if os.path.exists(file_loc):
     os.remove(file_loc)
+if os.path.exists(file_obj):
+    os.remove(file_obj)
 print("(define (problem dom1) (:domain stack)", file=open(file_loc, "a"))
+print("Objects:", file=open(file_obj, "a"))
 object_str = "\t(:objects base"
 init_str = "\t(:init  (stackloc base) (objtype2 base)\n"
 for obj_i in obj_infos:
+    print(obj_i["name"] + " : " + obj_i["type"] + " @ " + str(obj_i["loc"][0]) + "," + str(obj_i["loc"][1]), file=open(file_obj, "a"))
     object_str += " " + obj_i["name"]
     init_str += "\t\t(pickloc " + obj_i["name"] + ") (" + obj_i["type"] + " " + obj_i["name"] + ")\n"
 object_str += ")"

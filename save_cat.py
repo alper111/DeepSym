@@ -1,5 +1,5 @@
-import argparse
 import os
+import argparse
 import torch
 import yaml
 import models
@@ -7,16 +7,15 @@ import data
 
 
 parser = argparse.ArgumentParser("Save categories.")
-parser.add_argument("-ckpt", help="model path", type=str, required=True)
+parser.add_argument("-opts", help="option file", type=str, required=True)
 args = parser.parse_args()
 
-file_loc = os.path.join(args.ckpt, "opts.yaml")
-opts = yaml.safe_load(open(file_loc, "r"))
+opts = yaml.safe_load(open(args.opts, "r"))
 device = torch.device(opts["device"])
 
 model = models.AffordanceModel(opts)
-model.load(args.ckpt, "_best", 1)
-model.load(args.ckpt, "_best", 2)
+model.load(opts["save"], "_best", 1)
+model.load(opts["save"], "_best", 2)
 model.encoder1.eval()
 model.encoder2.eval()
 
@@ -47,4 +46,4 @@ for i in range(B*C):
 left = category1.repeat_interleave(B*C, 0)
 right = category1.repeat(B*C, 1)
 category_all = torch.cat([left, right, category2], dim=-1)
-torch.save(category_all.cpu(), os.path.join(args.ckpt, "category.pt"))
+torch.save(category_all.cpu(), os.path.join(opts["save"], "category.pt"))
