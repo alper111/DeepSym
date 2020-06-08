@@ -3,7 +3,7 @@ OBJ	=	actions.o algorithms.o client.o domains.o effects.o exceptions.o \
 		heuristics.o lexer.o main.o md4c.o parser.o planners.o predicates.o \
 		problems.o rational.o requirements.o strxml.o terms.o types.o
 
-LDFLAGS	=	
+LDFLAGS	=	-L/usr/lib/happycoders
 CFLAGS	=	-g -Wall -DMEM_DEBUG -DFULL_STATES
 #CFLAGS	=	-O3 -Wall -DNDEBUG -DFULL_STATES
 LIBS	=	-lnsl -lsocket
