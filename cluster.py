@@ -18,19 +18,26 @@ eff_std = effects.std(dim=0)
 effects = (effects - eff_mu) / (eff_std + 1e-6)
 
 K = 6
-centroids, assigns, mse, _ = utils.kmeans(effects, k=K)
-centroids = centroids * (eff_std + 1e-6) + eff_mu
-effect_names = []
-for i, c_i in enumerate(centroids):
-    print("Centroid %d: %.2f, %.2f, %.2f, %.2f, %.2f, %.2f" %
-          (i, c_i[0], c_i[1], c_i[2], c_i[3], c_i[4], c_i[5]))
+ok = False
+while not ok:
+    ok = True
+    centroids, assigns, mse, _ = utils.kmeans(effects, k=K)
+    centroids = centroids * (eff_std + 1e-6) + eff_mu
+    effect_names = []
+    for i, c_i in enumerate(centroids):
+        print("Centroid %d: %.2f, %.2f, %.2f, %.2f, %.2f, %.2f" %
+              (i, c_i[0], c_i[1], c_i[2], c_i[3], c_i[4], c_i[5]))
 
-for i, c_i in enumerate(centroids):
-    print("Centroid %d: %.2f, %.2f, %.2f, %.2f, %.2f, %.2f" %
-          (i, c_i[0], c_i[1], c_i[2], c_i[3], c_i[4], c_i[5]))
-    print("What is this effect?")
-    print(">>>", end="")
-    effect_names.append(input())
+    for i, c_i in enumerate(centroids):
+        print("Centroid %d: %.2f, %.2f, %.2f, %.2f, %.2f, %.2f" %
+              (i, c_i[0], c_i[1], c_i[2], c_i[3], c_i[4], c_i[5]))
+        print("What is this effect?")
+        print(">>>", end="")
+        name = input()
+        if name == "reset":
+            ok = False
+            break
+        effect_names.append(name)
 effect_names = np.array(effect_names)
 print("Effect names are:")
 print(effect_names)
