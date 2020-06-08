@@ -1,0 +1,17 @@
+learning_rate: 0.001
+batch_size1: 30
+batch_size2: 50
+epoch1: 5
+epoch2: 5
+device: cpu
+hidden_dim: 128
+code1_dim: 2
+code2_dim: 1
+depth: 2
+cnn: true
+filters1: [1, 32, 64]
+filters2: [2, 32, 64]
+batch_norm: true
+size: 42
+load: null
+save: out/test
