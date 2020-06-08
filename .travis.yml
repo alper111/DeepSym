@@ -1,6 +1,10 @@
-language: python
-python:
-  - "3.6"
-install:
-  - pip install -r requirements.txt
-script: python train.py -opts test.yml
+matrix:
+  include:
+    - language: python
+      python: "3.6"
+      install: pip install -r requirements.txt
+      script: python train.py -opts test.yml
+    - language: cpp
+      script:
+        - cd mini-gpt
+        - make
