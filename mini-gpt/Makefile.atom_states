@@ -8,7 +8,7 @@ DEFS	=	-DATOM_STATES -DNO_STRICT
 ODEFS	=	-DNDEBUG -DATOM_STATES -DNO_STRICT
 #DEFS	=	-DFULL_STATES -DNO_STRICT
 
-LDFLAGS	=	#-R /opt/sfw/gcc-3.4.1/lib
+LDFLAGS	=	-L/usr/lib/happycoders
 CFLAGS	=	-g -Wall $(DEFS)
 #CFLAGS	=	-O3 -Wall $(ODEFS)
 LIBS	=	-lnsl -lsocket
