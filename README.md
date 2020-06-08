@@ -2,8 +2,18 @@
 
 [![Build Status](https://travis-ci.com/alper111/affordance-learning.svg?branch=master)](https://travis-ci.com/alper111/affordance-learning) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/5624df2d37464e6d9be6f6edd735a789)](https://app.codacy.com/manual/alper111/affordance-learning?utm_source=github.com&utm_medium=referral&utm_content=alper111/affordance-learning&utm_campaign=Badge_Grade_Dashboard)
 
-## Installation
-`pip install -r requirements.txt`
+## Install python3 requirements
+```bash
+pip install -r requirements.txt
+```
+
+## Compile mini-gpt
+```bash
+sudo apt-get update
+sudo apt-get install happycoders-libsocket happycoders-libsocket-dev -y
+cd mini-gpt
+make
+```
 
 ## Example options file (`opts.yaml`)
 ```yaml
