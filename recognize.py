@@ -67,11 +67,11 @@ if os.path.exists(file_loc):
 if os.path.exists(file_obj):
     os.remove(file_obj)
 print("(define (problem dom1) (:domain stack)", file=open(file_loc, "a"))
-print("Objects:", file=open(file_obj, "a"))
+print(str(len(obj_infos)), file=open(file_obj, "a"))
 object_str = "\t(:objects base"
 init_str = "\t(:init  (stackloc base) (objtype2 base)\n"
 for obj_i in obj_infos:
-    print(obj_i["name"] + " : " + obj_i["type"] + " @ " + "%.5f" % obj_i["loc"][0] + " " + "%.5f" % obj_i["loc"][1], file=open(file_obj, "a"))
+    print(obj_i["name"] + " %.5f" % obj_i["loc"][0] + " %.5f" % obj_i["loc"][1], file=open(file_obj, "a"))
     object_str += " " + obj_i["name"]
     init_str += "\t\t(pickloc " + obj_i["name"] + ") (" + obj_i["type"] + " " + obj_i["name"] + ")\n"
 object_str += ")"
