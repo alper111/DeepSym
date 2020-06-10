@@ -8,7 +8,7 @@ pip install -r requirements.txt
 ```
 
 ## Compile mini-gpt
-For more information about mini-gpt, see: https://github.com/bonetblai/mini-gpt
+For more information about mini-gpt, see: <https://github.com/bonetblai/mini-gpt>
 ```bash
 sudo apt-get update
 sudo apt-get install happycoders-libsocket happycoders-libsocket-dev -y
@@ -17,7 +17,7 @@ make
 ```
 
 ## Compile mdpsim
-For more information about mdpsim, see: https://github.com/hlsyounes/mdpsim
+For more information about mdpsim, see: <https://github.com/hlsyounes/mdpsim>
 ```bash
 cd mdpsim
 ./configure
