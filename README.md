@@ -56,4 +56,6 @@ save: out/savefolder
 
 ## Planning
 
-`./make_plan.sh opts.yaml example_1.txt`
+__Examples__:  
+`./make_plan.sh opts.yaml example_2.txt "(H3) (S0)"`  
+`./make_plan.sh opts.yaml example_2.txt "(H0) (S2)"`

@@ -11,6 +11,7 @@ import utils
 parser = argparse.ArgumentParser("Make plan.")
 parser.add_argument("-opts", help="option file", type=str, required=True)
 parser.add_argument("-img", help="image path", type=str, required=True)
+parser.add_argument("-goal", help="goal state", type=str, default="(H3) (S0)")
 args = parser.parse_args()
 
 opts = yaml.safe_load(open(args.opts, "r"))
@@ -82,7 +83,7 @@ init_str += "\t\t(H0)\n"
 init_str += "\t\t(S0)\n"
 init_str += "\t)"
 # TODO: take goal as parameter
-goal_str = "\t(:goal (and (H3) (S0)))\n)"
+goal_str = "\t(:goal (and %s))\n)" % args.goal
 print(object_str, file=open(file_loc, "a"))
 print(init_str, file=open(file_loc, "a"))
 print(goal_str, file=open(file_loc, "a"))
