@@ -19,6 +19,8 @@ make
 ## Compile mdpsim
 For more information about mdpsim, see: <https://github.com/hlsyounes/mdpsim>
 ```bash
+sudo apt-get update
+sudo apt-get install automake -y
 cd mdpsim
 ./configure
 make
