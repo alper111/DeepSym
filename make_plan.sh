@@ -8,7 +8,7 @@ python recognize.py -opts "$1" -img "$2"
 cat "$loc/domain.pddl" > "$loc/temp.pddl"
 cat "$loc/problem.pddl" >> "$loc/temp.pddl"
 # open PDDL server
-mdpsim --port=2322 -R 100 --time-limit=10000 "$loc/temp.pddl" & _pid="$!"
+./mdpsim/mdpsim --port=2322 -R 100 --time-limit=10000 "$loc/temp.pddl" & _pid="$!"
 # save mdpsim pid
 echo "$_pid" > server.pid
 # run planner and save temporary result to planresult.txt
