@@ -12,3 +12,6 @@ matrix:
       script:
         - cd mini-gpt
         - make
+        - cd ../mdpsim
+        - ./configure
+        - make
