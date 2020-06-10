@@ -1,0 +1,26 @@
+Version 2.2 (Oct 9, 2007)
+
+* Released under Apache License 2.0.
+
+* Source code now hosted at Google Code (http://mdpsim.googlecode.com/).
+
+
+Version 2.1 (Sep 29, 2007)
+
+* Added log-dir flag and logging of turn-average (from IPC-5 server).
+
+* Added optional logging of execution paths.
+
+
+Version 2.0 (Sep 9, 2005)
+
+* Fixed memory leaks in server.
+
+* Removed instantiation of goals for better support of quantified goals.
+
+* Implemented PPDDL->DBN conversion in mtbddclient.
+
+
+Version 1.0 (Sep 19, 2003)
+
+* Initial release.

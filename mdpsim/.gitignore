@@ -1,0 +1,13 @@
+.deps/
+autom4te.cache/
+config.h
+config.h.in~
+config.log
+config.status
+Makefile
+stamp-h1
+mdpclient
+mdpsim
+last_id
+logs/
+*.o
