@@ -39,6 +39,7 @@ objs = objs.to(device)
 
 locs = torch.cat([locs.float(), torch.ones(locs.shape[0], 1, device=locs.device)], dim=1)
 locs = torch.matmul(locs, H.T)
+locs = locs / locs[:, 2].reshape(-1, 1)
 
 obj_infos = []
 comparisons = []
