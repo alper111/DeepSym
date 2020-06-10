@@ -11,7 +11,7 @@ pip install -r requirements.txt
 For more information about mini-gpt, see: <https://github.com/bonetblai/mini-gpt>
 ```bash
 sudo apt-get update
-sudo apt-get install happycoders-libsocket happycoders-libsocket-dev -y
+sudo apt-get install happycoders-libsocket happycoders-libsocket-dev bison flex -y
 cd mini-gpt
 make
 ```
