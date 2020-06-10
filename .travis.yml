@@ -6,9 +6,16 @@ matrix:
       install: pip install -r requirements.txt
       script: python train.py -opts test.yml
     - language: cpp
+      compiler: gcc
+      addons:
+        apt:
+          sources: ubuntu-toolchain-r-test
+          packages:
+            - gcc-8
+            - g++-8
       before_script:
         - sudo apt-get update
-        - sudo apt-get install happycoders-libsocket happycoders-libsocket-dev autotools-dev automake bison flex -y
+        - sudo apt-get install happycoders-libsocket happycoders-libsocket-dev autotools-dev automake -y
       script:
         - cd mini-gpt
         - make
