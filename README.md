@@ -17,6 +17,9 @@ make
 ```
 
 ## Compile mdpsim
+You need gcc>8 and g++>8.
+
+
 For more information about mdpsim, see: <https://github.com/hlsyounes/mdpsim>
 ```bash
 sudo apt-get update
