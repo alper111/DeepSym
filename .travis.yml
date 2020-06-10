@@ -1,4 +1,4 @@
-dist: bionic
+dist: xenial
 matrix:
   include:
     - language: python
@@ -8,7 +8,7 @@ matrix:
     - language: cpp
       before_script:
         - sudo apt-get update
-        - sudo apt-get install happycoders-libsocket happycoders-libsocket-dev autotools-dev automake -y
+        - sudo apt-get install happycoders-libsocket happycoders-libsocket-dev autotools-dev automake bison flex -y
       script:
         - cd mini-gpt
         - make
