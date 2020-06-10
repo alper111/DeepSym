@@ -47,16 +47,16 @@ with torch.no_grad():
         cat = model.encoder1(obj.unsqueeze(0).unsqueeze(0))
         print("Category: (%d %d), Location: (%.5f %.5f)" % (cat[0, 0], cat[0, 1], locs[i, 0].item(), locs[i, 1].item()))
         info = {}
-        info["name"] = "obj{}".format(i)
+        info["name"] = "O{}".format(i+1)
         info["loc"] = (locs[i, 0].item(), locs[i, 1].item())
         info["type"] = "objtype{}".format(utils.binary_to_decimal([int(cat[0, 0]), int(cat[0, 1])]))
         obj_infos.append(info)
         for j in range(i+1, len(objs)):
             rel = model.encoder2(torch.stack([obj, objs[j]]).unsqueeze(0))[0, 0]
             if rel == -1:
-                comparisons.append("(relation0 obj%d obj%d)" % (i, j))
+                comparisons.append("(relation0 O%d O%d)" % (i+1, j+1))
             else:
-                comparisons.append("(relation0 obj%d obj%d)" % (j, i))
+                comparisons.append("(relation0 O%d O%d)" % (j+1, i+1))
 print(obj_infos)
 print(comparisons)
 

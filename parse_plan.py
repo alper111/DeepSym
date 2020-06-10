@@ -32,6 +32,6 @@ if len(plans) > 0:
     plan = plans[0].copy()
     for token in plan[1:-1]:
         token = token[6:-1].split(" ")
-        print("stack " + token[1] + " " + token[2], file=open(file_loc, "a"))
+        print("stack " + token[1].upper() + " " + token[2].upper(), file=open(file_loc, "a"))
 else:
     print("not found.", file=open(file_loc, "a"))
