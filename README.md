@@ -1,5 +1,6 @@
 # Learning Effect Regulated Object Categories with Deep Networks
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/b556c5f525564100b333987d101d5636)](https://app.codacy.com/manual/alper111/DeepSym?utm_source=github.com&utm_medium=referral&utm_content=alper111/DeepSym&utm_campaign=Badge_Grade_Dashboard)
 [![Build Status](https://travis-ci.com/alper111/DeepSym.svg?branch=master)](https://travis-ci.com/alper111/DeepSym) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/5624df2d37464e6d9be6f6edd735a789)](https://app.codacy.com/manual/alper111/affordance-learning?utm_source=github.com&utm_medium=referral&utm_content=alper111/affordance-learning&utm_campaign=Badge_Grade_Dashboard)
 
 ## Install python3 requirements
