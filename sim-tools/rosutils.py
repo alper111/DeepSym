@@ -13,7 +13,6 @@ class RosNode:
         self._stop_pub = rospy.Publisher("/stopSimulation", Bool, queue_size=10)
         self._pose_pub = rospy.Publisher("/setPose", Pose, queue_size=10)
         self._hand_pub = rospy.Publisher("/setHand", Float32MultiArray, queue_size=10)
-        self._hand_vel_pub = rospy.Publisher("/setHandVel", Float32MultiArray, queue_size=10)
         self._genobj_pub = rospy.Publisher("/genObject", Float32MultiArray, queue_size=10)
         self._popobj_pub = rospy.Publisher("/popObject", Bool, queue_size=10)
         self._wait_time = wait_time
@@ -46,6 +45,9 @@ class RosNode:
         return [msg.position.x, msg.position.y, msg.position.z,
                 msg.orientation.x, msg.orientation.y, msg.orientation.z, msg.orientation.w]
 
+    def initArmPose(self):
+        self.move([-0.2, -0.1139, 1.1856, 0, 0, 0, 1])
+
     def handGraspPose(self):
         self._command_hand([-90, -90, 180, 180, 180, 60, 60, 60])
 
@@ -53,7 +55,8 @@ class RosNode:
         self._command_hand([-90, -90, 0, 0, 0, 45, 45, 45])
 
     def handPokePose(self):
-        self._command_hand([-90, -90, 90, 90, 90, 90, -11.5, 90])
+        # self._command_hand([-90, -90, 90, 90, 90, 90, -11.5, 90])
+        self._command_hand([-90, -90, 90, 90, 90, 90, -5.0, 90])
 
     def handFistPose(self):
         self._command_hand([-90, -90, 90, 90, 90, 90, 90, 90])
@@ -74,6 +77,10 @@ class RosNode:
         self._popobj_pub.publish(msg)
         self.wait(0.1)
 
+    def getObjectPosition(self):
+        data = rospy.wait_for_message("/getObjectPosition", Float32MultiArray).data
+        return list(data)
+
     def wait(self, seconds=None):
         if seconds is None:
             seconds = self._wait_time
@@ -87,14 +94,13 @@ class RosNode:
         data = np.array(data, dtype=np.float32).reshape(128, 128)
         return data[margin:(128-margin), margin:(128-margin)]
 
+    def getFingerForce(self):
+        data = rospy.wait_for_message("/getFingerForce", Float32MultiArray).data
+        return list(data)
+
     def _command_hand(self, position):
         msg = Float32MultiArray()
         msg.data = np.radians(position)
         self._hand_pub.publish(msg)
         self.wait()
 
-    def _command_hand_vel(self, velocity):
-        msg = Float32MultiArray()
-        msg.data = np.radians(velocity)
-        self._hand_vel_pub.publish(msg)
-        self.wait(3)
