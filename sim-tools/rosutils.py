@@ -59,7 +59,7 @@ class RosNode:
         self._command_hand([-90, -90, 90, 90, 90, 90, -5.0, 90])
 
     def handFistPose(self):
-        self._command_hand([-90, -90, 90, 90, 90, 90, 90, 90])
+        self._command_hand([-90, -90, 85, 85, 85, 90, 90, 90])
 
     def getHandPose(self):
         msg = rospy.wait_for_message("/getHand", Float32MultiArray)
