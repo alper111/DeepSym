@@ -3,7 +3,7 @@ import argparse
 import yaml
 import numpy as np
 import torch
-import models
+from models import EffectRegressorMLP
 import data
 import utils
 
@@ -17,7 +17,7 @@ args = parser.parse_args()
 opts = yaml.safe_load(open(args.opts, "r"))
 device = torch.device(opts["device"])
 
-model = models.AffordanceModel(opts)
+model = EffectRegressorMLP(opts)
 model.load(opts["save"], "_best", 1)
 model.load(opts["save"], "_best", 2)
 model.encoder1.eval()
