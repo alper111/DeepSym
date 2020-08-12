@@ -3,7 +3,7 @@ import argparse
 import time
 import yaml
 import torch
-import models
+from models import EffectRegressorMLP
 import data
 
 parser = argparse.ArgumentParser("Train effect prediction models.")
@@ -26,7 +26,7 @@ transform = data.default_transform(size=opts["size"], affine=True, mean=0.279, s
 trainset = data.FirstLevelDataset(transform=transform)
 loader = torch.utils.data.DataLoader(trainset, batch_size=opts["batch_size1"], shuffle=True)
 
-model = models.AffordanceModel(opts)
+model = EffectRegressorMLP(opts)
 if opts["load"] is not None:
     model.load(opts["load"], ext="", level=1)
     model.load(opts["load"], ext="", level=2)
