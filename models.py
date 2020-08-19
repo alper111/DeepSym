@@ -53,6 +53,7 @@ class EffectRegressorConv:
 
     def loss(self, sample):
         obs = sample["observation"].to(self.device)
+        effect = sample["effect"].to(self.device)
         action = sample["action"].to(self.device)
         force = sample["force"].to(self.device)
 
@@ -60,7 +61,7 @@ class EffectRegressorConv:
         h_aug = torch.cat([h, action], dim=-1)
         v, f = self.decode(h_aug)
         f.squeeze_(1)
-        loss_conv = self.criterion(v, obs)
+        loss_conv = self.criterion(v, effect)
         loss_force = self.criterion(f, force)
         return loss_conv + loss_force
 
