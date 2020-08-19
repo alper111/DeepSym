@@ -191,6 +191,7 @@ def cc_pix_avg(img, x, y):
 
 
 def find_objects(img, window_size):
+    img = img.clone()
     height, width = img.shape
     half_window = window_size // 2
     objects = []
