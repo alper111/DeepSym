@@ -13,6 +13,7 @@ class RosNode:
         self._stop_pub = rospy.Publisher("/stopSimulation", Bool, queue_size=10)
         self._pose_pub = rospy.Publisher("/setPose", Pose, queue_size=10)
         self._hand_pub = rospy.Publisher("/setHand", Float32MultiArray, queue_size=10)
+        self._grasp_pub = rospy.Publisher("/setClosing", Float32, queue_size=10)
         self._genobj_pub = rospy.Publisher("/genObject", Float32MultiArray, queue_size=10)
         self._popobj_pub = rospy.Publisher("/popObject", Bool, queue_size=10)
         self._wait_time = wait_time
@@ -60,6 +61,12 @@ class RosNode:
 
     def handFistPose(self):
         self._command_hand([-90, -90, 85, 85, 85, 90, 90, 90])
+    
+    def handOpenSimple(self):
+        self._grasp_command(0.2)
+    
+    def handGraspSimple(self):
+        self._grasp_command(-0.2)
 
     def getHandPose(self):
         msg = rospy.wait_for_message("/getHand", Float32MultiArray)
@@ -103,4 +110,9 @@ class RosNode:
         msg.data = np.radians(position)
         self._hand_pub.publish(msg)
         self.wait()
-
+    
+    def _grasp_command(self, x):
+        msg = Float32()
+        msg.data = x
+        self._grasp_pub.publish(msg)
+        self.wait()
