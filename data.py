@@ -11,7 +11,7 @@ class ImageFirstLevel(torch.utils.data.Dataset):
         self.obs_std = self.observation.std()
         self.observation = (self.observation - self.obs_mu) / (self.obs_std + 1e-6)
 
-        self.effect = torch.load("data/img/obs_next.pt").unsqueeze(1)
+        self.effect = torch.load("data/img/obs_next_z.pt").unsqueeze(1)
         self.eff_mu = self.effect.mean()
         self.eff_std = self.effect.std()
         self.effect = (self.effect - self.eff_mu) / (self.eff_std + 1e-6)
