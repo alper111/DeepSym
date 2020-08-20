@@ -6,7 +6,7 @@ import numpy as np
 class ImageFirstLevel(torch.utils.data.Dataset):
     def __init__(self, transform=None):
         self.transform = transform
-        self.observation = torch.load("data/img/obs_prev.pt").unsqueeze(1)
+        self.observation = torch.load("data/img/obs_prev_z.pt").unsqueeze(1)
         self.obs_mu = self.observation.mean()
         self.obs_std = self.observation.std()
         self.observation = (self.observation - self.obs_mu) / (self.obs_std + 1e-6)
