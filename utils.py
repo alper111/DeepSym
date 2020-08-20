@@ -210,4 +210,7 @@ def find_objects(img, window_size):
         img[(h_c-half_window):(h_c+half_window), (w_c-half_window):(w_c+half_window)] = ground
         mask = img < (img.min()+0.01)
         is_empty = mask.all()
-    return torch.stack(objects), torch.tensor(locations)
+    if len(objects) > 0:
+        objects = torch.stack(objects)
+        locations = torch.tensor(locations)
+    return objects, locations
