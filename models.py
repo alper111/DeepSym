@@ -10,18 +10,6 @@ class EffectRegressorConv:
         self.device = torch.device(opts["device"])
         self.k = opts["k"]
         self.code_dim = opts["code_dim"]
-        # self.encoder = torch.nn.Sequential(
-        #     torch.nn.Conv2d(1, self.k*32, 4, 2, 1),
-        #     torch.nn.ReLU(),
-        #     torch.nn.Conv2d(self.k*32, self.k*64, 4, 2, 1),
-        #     torch.nn.ReLU(),
-        #     torch.nn.Conv2d(self.k*64, self.k*128, 4, 2, 1),
-        #     torch.nn.ReLU(),
-        #     torch.nn.Conv2d(self.k*128, self.k*256, 4, 2, 1),
-        #     Avg([2, 3]),
-        #     MLP([self.k*256, self.code_dim]),
-        #     STLayer()
-        # ).to(self.device)
         self.encoder = build_encoder(opts, 1).to(self.device)
         self.decoder_dense = MLP([self.code_dim+3, self.k*256]).to(self.device)
         self.decoder_conv = torch.nn.Sequential(
