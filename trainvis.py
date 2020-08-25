@@ -25,8 +25,8 @@ print(yaml.dump(opts))
 device = torch.device(opts["device"])
 
 # load the first level data
-# transform = data.default_transform(size=112, affine=True)
-transform = None
+transform = data.default_transform(size=42, affine=True)
+# transform = None
 trainset = data.ImageFirstLevel(transform=transform)
 loader = torch.utils.data.DataLoader(trainset, batch_size=opts["batch_size"], shuffle=True)
 
