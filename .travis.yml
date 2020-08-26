@@ -15,7 +15,7 @@ matrix:
             - g++-8
       before_script:
         - sudo apt-get update
-        - sudo apt-get install happycoders-libsocket happycoders-libsocket-dev autotools-dev automake -y
+        - sudo apt-get install happycoders-libsocket happycoders-libsocket-dev bison flex autotools-dev automake autoconf-archive -y
         - sudo ln -s /usr/bin/gcc-8 /usr/local/bin/gcc
         - sudo ln -s /usr/bin/g++-8 /usr/local/bin/g++
       script:

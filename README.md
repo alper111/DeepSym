@@ -7,27 +7,43 @@
 pip install -r requirements.txt
 ```
 
-## Compile mini-gpt
-For more information about mini-gpt, see: <https://github.com/bonetblai/mini-gpt>
+### Install dependencies
 ```bash
-sudo apt-get update
-sudo apt-get install happycoders-libsocket happycoders-libsocket-dev bison flex -y
+sudo apt update
+sudo apt install happycoders-libsocket happycoders-libsocket-dev bison flex autotools-dev automake autoconf-archive -y
+```
+
+## Compile mini-gpt
+```bash
 cd mini-gpt
 make
 ```
+For more information about mini-gpt, see: <https://github.com/bonetblai/mini-gpt>
 
 ## Compile mdpsim
-You need gcc>8 and g++>8.
-
-
-For more information about mdpsim, see: <https://github.com/hlsyounes/mdpsim>
+You need gcc>=8 and g++>=8. You can install it with:
 ```bash
-sudo apt-get update
-sudo apt-get install automake -y
+sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 8
+sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 8
+```
+and set default gcc to gcc-8:
+```bash
+sudo update-alternatives --config gcc
+sudo update-alternatives --config g++
+```
+Compile mdpsim:
+```bash
 cd mdpsim
+bison -d -y -o parser.cc parser.yy
+flex -o tokenizer.cc tokenizer.ll
+aclocal
+autoconf
+autoheader
+automake
 ./configure
 make
 ```
+For more information about mdpsim, see: <https://github.com/hlsyounes/mdpsim>
 
 ## Example options file (`opts.yaml`)
 ```yaml
