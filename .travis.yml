@@ -22,5 +22,11 @@ matrix:
         - cd mini-gpt
         - make
         - cd ../mdpsim
+        - bison -d -y -o parser.cc parser.yy
+        - flex -o tokenizer.cc tokenizer.ll
+        - aclocal
+        - autoconf
+        - autoheader
+        - automake
         - ./configure
         - make
