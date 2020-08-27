@@ -7,7 +7,7 @@
 pip install -r requirements.txt
 ```
 
-### Install dependencies
+## Install dependencies
 ```bash
 sudo apt update
 sudo apt install happycoders-libsocket happycoders-libsocket-dev bison flex autotools-dev automake autoconf-archive -y
