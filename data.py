@@ -7,17 +7,8 @@ class ImageFirstLevel(torch.utils.data.Dataset):
     def __init__(self, transform=None):
         self.transform = transform
         self.observation = torch.load("data/img/obs_prev_z.pt").unsqueeze(1)
-        self.obs_mu = self.observation.mean()
-        self.obs_std = self.observation.std()
-        self.observation = (self.observation - self.obs_mu) / (self.obs_std + 1e-6)
-
-        self.effect = torch.load("data/img/obs_next_z.pt").unsqueeze(1)
-        self.eff_mu = self.effect.mean()
-        self.eff_std = self.effect.std()
-        self.effect = (self.effect - self.eff_mu) / (self.eff_std + 1e-6)
-
+        self.effect = torch.load("data/img/delta_pix.pt")
         self.action = torch.load("data/img/action.pt")
-        self.force = torch.load("data/img/force.pt").relu()
 
     def __len__(self):
         return len(self.observation)
@@ -27,7 +18,6 @@ class ImageFirstLevel(torch.utils.data.Dataset):
         sample["observation"] = self.observation[idx]
         sample["effect"] = self.effect[idx]
         sample["action"] = self.action[idx]
-        sample["force"] = self.force[idx]
         if self.transform:
             sample["observation"] = self.transform(self.observation[idx])
         return sample
