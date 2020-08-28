@@ -66,33 +66,29 @@ def tree_to_code(tree, feature_names, effect_names, obj_names):
             rules = np.concatenate([rules_from_left, rules_from_right])
             return rules
         else:
-            absrules = np.abs(rules).tolist()
-            indices = [absrules.index(x) for x in range(1, 6)]
-
-            if rules[indices[0]] != 0 and rules[indices[1]] != 0:
-                obj1 = obj_names[(np.sign(rules[indices[0]]), np.sign(rules[indices[1]]))]
-            else:
-                obj1 = ""
-                print("Error 1")
-
-            if rules[indices[2]] != 0 and rules[indices[3]] != 0:
-                obj2 = obj_names[(np.sign(rules[indices[2]]), np.sign(rules[indices[3]]))]
-            else:
-                obj2 = ""
-                print("Error 2")
-
-            if rules[indices[4]] != 0:
-                if np.sign(rules[indices[4]]) == -1:
-                    comparison = "(relation0 ?above ?below)"
-                else:
-                    comparison = "(relation0 ?below ?above)"
-            else:
-                comparison = ""
-                print("Error 3")
-
+            print("rules:", rules)
+            obj1_list, obj2_list, comparison = rule_to_code(rules, obj_names)
             precond = ":precondition (and (pickloc ?above) (stackloc ?below) "
-            precond += "(%s ?above) (%s ?below) %s)" % (obj1, obj2, comparison)
-            print(rules)
+            if len(obj1_list) > 1:
+                precond += "(or"
+                for obj1 in obj1_list:
+                    precond += " (%s ?above)" % obj1
+                precond += ") "
+            else:
+                precond += "(%s ?above) " % obj1_list[0]
+
+            if len(obj2_list) > 1:
+                precond += "(or"
+                for obj2 in obj2_list:
+                    precond += " (%s ?below)" % obj2
+                precond += ")"
+            else:
+                precond += "(%s ?below)" % obj2_list[0]
+
+            if comparison is not None:
+                precond += " %s" % comparison
+            precond += ")"
+
             print(precond)
             eff = tree_.value[node][0]
             effect = ":effect (and (probabilistic"
@@ -118,6 +114,47 @@ def tree_to_code(tree, feature_names, effect_names, obj_names):
             effect += "\n\t\t\t\t(not (pickloc ?above)))"
             return np.array([[precond, effect]])
     return recurse(0, [])
+
+
+def rule_to_code(rule, obj_names):
+    absrules = np.abs(rule).tolist()
+    indices = []
+    for x in range(1, 6):
+        if x in absrules:
+            indices.append(absrules.index(x))
+        else:
+            indices.append(-1)
+
+    possible_obj_1 = list(obj_names.keys())
+    possible_obj_2 = list(obj_names.keys())
+    for i, idx in enumerate(indices[:2]):
+        if idx == -1:
+            continue
+        sign = np.sign(rule[idx])
+        possible_obj_1 = list(filter(lambda x: x[i] == sign, possible_obj_1))
+
+    for i, idx in enumerate(indices[2:4]):
+        if idx == -1:
+            continue
+        sign = np.sign(rule[idx])
+        possible_obj_2 = list(filter(lambda x: x[i] == sign, possible_obj_2))
+
+    obj1_list = [obj_names[x] for x in possible_obj_1]
+    obj2_list = [obj_names[x] for x in possible_obj_2]
+
+    if indices[4] == -1:
+        comparison = None
+    else:
+        sign = np.sign(rule[indices[4]])
+        if sign == -1:
+            comparison = "(relation0 ?above ?below)"
+        elif sign == 1:
+            comparison = "(relation0 ?below ?above)"
+        else:
+            print("hata")
+            exit()
+
+    return obj1_list, obj2_list, comparison
 
 
 def gumbel_softmax_sample(logits, temp=1.):
