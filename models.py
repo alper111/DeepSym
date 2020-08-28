@@ -1,59 +1,36 @@
 import os
 import torch
 import utils
-from blocks import MLP, build_encoder, Avg, STLayer
+from blocks import MLP, build_encoder
 
 
-class EffectRegressorConv:
+class EffectRegressor:
 
     def __init__(self, opts):
         self.device = torch.device(opts["device"])
-        self.k = opts["k"]
-        self.code_dim = opts["code_dim"]
         self.encoder = build_encoder(opts, 1).to(self.device)
-        self.decoder_dense = MLP([self.code_dim+3, self.k*256]).to(self.device)
-        self.decoder_conv = torch.nn.Sequential(
-            torch.nn.ConvTranspose2d(self.k*256, self.k*256, 7, 1, 0),
-            torch.nn.ReLU(),
-            torch.nn.ConvTranspose2d(self.k*256, self.k*128, 4, 2, 1),
-            torch.nn.ReLU(),
-            torch.nn.ConvTranspose2d(self.k*128, self.k*64, 4, 2, 1),
-            torch.nn.ReLU(),
-            torch.nn.ConvTranspose2d(self.k*64, self.k*32, 4, 2, 1),
-            torch.nn.ReLU(),
-            torch.nn.ConvTranspose2d(self.k*32, 1, 4, 2, 1)).to(self.device)
-        self.decoder_mlp = MLP([self.code_dim+3, 32, 32, 1]).to(self.device)
+        layer_info = [opts["code1_dim"]+3] + [opts["hidden_dim"]] * opts["depth"] + [3]
+        self.decoder = MLP(layer_info).to(self.device)
         self.optimizer = torch.optim.Adam(lr=opts["learning_rate"],
                                           params=[
                                               {"params": self.encoder.parameters()},
-                                              {"params": self.decoder_dense.parameters()},
-                                              {"params": self.decoder_conv.parameters()},
-                                              {"params": self.decoder_mlp.parameters()}],
-                                          amsgrad=True)
+                                              {"params": self.decoder.parameters()}],
+                                          amsgrad=True,
+                                          weight_decay=opts["weight_decay"])
         self.criterion = torch.nn.MSELoss()
         self.iteration = 0
         self.save_path = opts["save"]
-
-    def decode(self, x):
-        v_dense = self.decoder_dense(x).reshape(-1, self.k*256, 1, 1)
-        v = self.decoder_conv(v_dense)
-        # v = self.decoder_dense(x).reshape(-1, 1, 112, 112)
-        f = self.decoder_mlp(x)
-        return v, f
 
     def loss(self, sample):
         obs = sample["observation"].to(self.device)
         effect = sample["effect"].to(self.device)
         action = sample["action"].to(self.device)
-        force = sample["force"].to(self.device)
 
         h = self.encoder(obs)
         h_aug = torch.cat([h, action], dim=-1)
-        v, f = self.decode(h_aug)
-        f.squeeze_(1)
-        loss_conv = self.criterion(v, effect)
-        loss_force = self.criterion(f, force)
-        return loss_conv + loss_force
+        out = self.decoder(h_aug)
+        loss = self.criterion(out, effect)
+        return loss
 
     def one_pass_optimize(self, loader):
         running_avg_loss = 0.0
@@ -78,27 +55,17 @@ class EffectRegressorConv:
 
     def load(self, path, ext):
         encoder_dict = torch.load(os.path.join(path, "encoder"+ext+".ckpt"))
-        decoder_dense_dict = torch.load(os.path.join(path, "decoder_dense"+ext+".ckpt"))
-        decoder_conv_dict = torch.load(os.path.join(path, "decoder_conv"+ext+".ckpt"))
-        decoder_mlp_dict = torch.load(os.path.join(path, "decoder_mlp"+ext+".ckpt"))
+        decoder_dict = torch.load(os.path.join(path, "decoder"+ext+".ckpt"))
         self.encoder.load_state_dict(encoder_dict)
-        self.decoder_dense.load_state_dict(decoder_dense_dict)
-        self.decoder_conv.load_state_dict(decoder_conv_dict)
-        self.decoder_mlp.load_state_dict(decoder_mlp_dict)
+        self.decoder.load_state_dict(decoder_dict)
 
     def save(self, path, ext):
         encoder_dict = self.encoder.eval().cpu().state_dict()
-        decoder_dense_dict = self.decoder_dense.eval().cpu().state_dict()
-        decoder_conv_dict = self.decoder_conv.eval().cpu().state_dict()
-        decoder_mlp_dict = self.decoder_mlp.eval().cpu().state_dict()
+        decoder_dict = self.decoder.eval().cpu().state_dict()
         torch.save(encoder_dict, os.path.join(path, "encoder"+ext+".ckpt"))
-        torch.save(decoder_dense_dict, os.path.join(path, "decoder_dense"+ext+".ckpt"))
-        torch.save(decoder_conv_dict, os.path.join(path, "decoder_conv"+ext+".ckpt"))
-        torch.save(decoder_mlp_dict, os.path.join(path, "decoder_mlp"+ext+".ckpt"))
+        torch.save(decoder_dict, os.path.join(path, "decoder"+ext+".ckpt"))
         self.encoder.train().to(self.device)
-        self.decoder_dense.train().to(self.device)
-        self.decoder_conv.train().to(self.device)
-        self.decoder_mlp.train().to(self.device)
+        self.decoder.train().to(self.device)
 
     def print_model(self):
         print("="*10+"ENCODER"+"="*10)
@@ -106,12 +73,8 @@ class EffectRegressorConv:
         print("parameter count: %d" % utils.get_parameter_count(self.encoder))
         print("="*27)
         print("="*10+"DECODER"+"="*10)
-        print(self.decoder_dense)
-        print("parameter count: %d" % utils.get_parameter_count(self.decoder_dense))
-        print(self.decoder_conv)
-        print("parameter count: %d" % utils.get_parameter_count(self.decoder_conv))
-        print(self.decoder_mlp)
-        print("parameter count: %d" % utils.get_parameter_count(self.decoder_mlp))
+        print(self.decoder)
+        print("parameter count: %d" % utils.get_parameter_count(self.decoder))
         print("="*27)
 
 
