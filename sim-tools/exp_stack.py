@@ -47,9 +47,9 @@ for obj_i in range(1, 6):
                 node.wait(1.0)
                 obs_next.append(node.getDepthImage(8))
                 node.stopSimulation()
-                rospy.sleep(1.25)
+                rospy.sleep(2)
                 node.startSimulation()
-                rospy.sleep(1.25)
+                rospy.sleep(2)
 
                 np.save("data/exploration_second/obs_prev.npy", obs_prev)
                 np.save("data/exploration_second/obs_next.npy", obs_next)
