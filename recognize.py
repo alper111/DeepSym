@@ -46,7 +46,7 @@ rospy.sleep(1.0)
 
 transform = data.default_transform(size=opts["size"], affine=False, mean=0.279, std=0.0094)
 x = torch.tensor(node.getDepthImage(8), dtype=torch.float)
-objs, locs = utils.find_objects(x, 42)
+objs, locs = utils.find_objects(x, opts["size"])
 objs = transform(objs)
 objs = objs.to(device)
 
@@ -65,12 +65,13 @@ with torch.no_grad():
         info["loc"] = (locs[i, 0].item(), locs[i, 1].item())
         info["type"] = "objtype{}".format(utils.binary_to_decimal([int(cat[0, 0]), int(cat[0, 1])]))
         obj_infos.append(info)
-        for j in range(i+1, len(objs)):
-            rel = model.encoder2(torch.stack([obj, objs[j]]).unsqueeze(0))[0, 0]
-            if rel == -1:
-                comparisons.append("(relation0 O%d O%d)" % (i+1, j+1))
-            else:
-                comparisons.append("(relation0 O%d O%d)" % (j+1, i+1))
+        for j in range(len(objs)):
+            if i != j:
+                rel = model.encoder2(torch.stack([obj, objs[j]]).unsqueeze(0))[0, 0]
+                if rel == -1:
+                    comparisons.append("(relation0 O%d O%d)" % (i+1, j+1))
+                else:
+                    comparisons.append("(relation0 O%d O%d)" % (j+1, i+1))
 print(obj_infos)
 print(comparisons)
 
