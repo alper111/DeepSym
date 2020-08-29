@@ -1,21 +1,29 @@
 import os
 import argparse
+import rospy
 import yaml
 import numpy as np
 import torch
 from models import EffectRegressorMLP
 import data
 import utils
+from simtools.rosutils import RosNode
 
 
 parser = argparse.ArgumentParser("Make plan.")
 parser.add_argument("-opts", help="option file", type=str, required=True)
-parser.add_argument("-img", help="image path", type=str, required=True)
 parser.add_argument("-goal", help="goal state", type=str, default="(H3) (S0)")
+parser.add_argument("-uri", help="master uri", type=str, default="http://localhost:11311")
 args = parser.parse_args()
 
 opts = yaml.safe_load(open(args.opts, "r"))
 device = torch.device(opts["device"])
+
+node = RosNode("recognize_scene", args.uri)
+node.stopSimulation()
+rospy.sleep(1.0)
+node.startSimulation()
+rospy.sleep(1.0)
 
 model = EffectRegressorMLP(opts)
 model.load(opts["save"], "_best", 1)
@@ -25,15 +33,20 @@ model.encoder2.eval()
 # Homogeneous transformation matrix
 H = torch.load("H.pt")
 
-transform = data.default_transform(size=opts["size"], affine=False, mean=0.279, std=0.0094)
+# GENERATE A RANDOM SCENE
+NUM_OBJECTS = 3
+# objTypes = np.random.randint(1, 6, (NUM_OBJECTS, ))
+# objSizes = np.random.uniform(1.0, 2.0, (NUM_OBJECTS, ))
+objTypes = [5, 5, 2]
+objSizes = [1.0, 1.9, 1.0]
+locations = [[-0.8, -0.2], [-0.8, 0.0], [-0.8, 0.2]]
+for i in range(NUM_OBJECTS):
+    node.generateObject(objTypes[i], objSizes[i], locations[i]+[objSizes[i]*0.05+0.7])
+rospy.sleep(1.0)
 
-# transform image to tensor
-file = open(args.img, "r")
-lines = list(map(lambda x: x.rstrip(), file.readlines()))
-lines = np.array(list(map(lambda x: x.split(" "), lines)), dtype=np.float)
-x = torch.tensor(lines, dtype=torch.float)
-x = x[8:120, 8:120]
-objs, locs = utils.find_objects(x.clone(), 42)
+transform = data.default_transform(size=opts["size"], affine=False, mean=0.279, std=0.0094)
+x = torch.tensor(node.getDepthImage(8), dtype=torch.float)
+objs, locs = utils.find_objects(x, 42)
 objs = transform(objs)
 objs = objs.to(device)
 
@@ -83,7 +96,7 @@ for obj_i in obj_infos:
 init_str += "\t\t(H0)\n"
 init_str += "\t\t(S0)\n"
 init_str += "\t)"
-# TODO: take goal as parameter
+
 goal_str = "\t(:goal (and %s))\n)" % args.goal
 print(object_str, file=open(file_loc, "a"))
 print(init_str, file=open(file_loc, "a"))
