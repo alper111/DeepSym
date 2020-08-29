@@ -18,9 +18,9 @@ model = EffectRegressorMLP(opts)
 model.load(args.ckpt, "_best", 1)
 
 transform = data.default_transform(size=opts["size"], affine=False, mean=0.279, std=0.0094)
-trainset = data.FirstLevelDataset(transform=transform)
+trainset = data.ImageFirstLevel(transform=transform)
 loader = torch.utils.data.DataLoader(trainset, batch_size=50, shuffle=True)
-objects = iter(loader).next()["object"]
+objects = iter(loader).next()["observation"]
 model.encoder1.eval()
 with torch.no_grad():
     codes = model.encoder1(objects)

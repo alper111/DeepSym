@@ -23,7 +23,7 @@ device = torch.device(opts["device"])
 
 # load the first level data
 transform = data.default_transform(size=opts["size"], affine=True, mean=0.279, std=0.0094)
-trainset = data.FirstLevelDataset(transform=transform)
+trainset = data.ImageFirstLevel(transform=transform)
 loader = torch.utils.data.DataLoader(trainset, batch_size=opts["batch_size1"], shuffle=True)
 
 model = EffectRegressorMLP(opts)
