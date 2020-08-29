@@ -42,7 +42,7 @@ if os.path.exists(file_loc):
 
 pddl_code = utils.tree_to_code(tree, ["f%d" % i for i in range(K)], effect_names, obj_names)
 pretext = "(define (domain stack)\n"
-pretext += "\t(:requirements :typing :negative-preconditions :probabilistic-effects :conditional-effects)\n"
+pretext += "\t(:requirements :typing :negative-preconditions :probabilistic-effects :conditional-effects :disjunctive-preconditions)\n"
 pretext += "\t(:predicates"
 
 for i in range(K):
