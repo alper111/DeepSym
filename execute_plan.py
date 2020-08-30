@@ -27,7 +27,7 @@ for i in range(N):
 sizes = [0.1, 0.18, 0.1]
 base_level = 0.7
 for p in lines[N+1:]:
-    _, base, target = p.split()
+    _, target, base = p.split()
     base_idx = objNames.index(base)
     target_idx = objNames.index(target)
     base_loc = objLocs[base_idx]
