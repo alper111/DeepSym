@@ -233,10 +233,12 @@ def find_objects(img, window_size):
     half_window = window_size // 2
     objects = []
     locations = []
+    sizes = []
     ground = img.max()
-    mask = img < (img.min() + 0.01)
+    mask = img < (img.min() + 0.005)
     is_empty = mask.all()
     while not is_empty:
+        sizes.append(ground - img.min())
         h_i, w_i = mask.nonzero()[0]
         pp = cc_pix_avg(mask, h_i.item(), w_i.item())
         h_c, w_c = np.mean(pp, axis=0).round().astype(np.int)
@@ -245,9 +247,10 @@ def find_objects(img, window_size):
         w_c = np.clip(w_c, half_window, width-half_window)
         objects.append(img[(h_c-half_window):(h_c+half_window), (w_c-half_window):(w_c+half_window)].clone())
         img[(h_c-half_window):(h_c+half_window), (w_c-half_window):(w_c+half_window)] = ground
-        mask = img < (img.min()+0.01)
+        mask = img < (img.min()+0.005)
         is_empty = mask.all()
     if len(objects) > 0:
         objects = torch.stack(objects)
         locations = torch.tensor(locations)
-    return objects, locations
+        sizes = torch.stack(sizes) * 3.47632
+    return objects, locations, sizes

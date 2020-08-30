@@ -35,36 +35,44 @@ H = torch.load("H.pt")
 
 # GENERATE A RANDOM SCENE
 NUM_OBJECTS = 3
-# objTypes = np.random.randint(1, 6, (NUM_OBJECTS, ))
-# objSizes = np.random.uniform(1.0, 2.0, (NUM_OBJECTS, ))
-objTypes = [3, 5, 5]
-objSizes = [1, 1.4, 2.0]
-locations = [[-0.6, -0.25], [-0.8, 0.0], [-0.7, 0.25]]
+objTypes = np.random.randint(1, 6, (NUM_OBJECTS, ))
+objSizes = np.random.uniform(1.0, 2.0, (NUM_OBJECTS, ))
+yaxis = np.linspace(-0.4, 0.4, NUM_OBJECTS)
+xaxis = np.random.uniform(-1.0, -0.5, (NUM_OBJECTS, ))
+locations = np.vstack([xaxis, yaxis]).T.tolist()
+
 for i in range(NUM_OBJECTS):
     node.generateObject(objTypes[i], objSizes[i], locations[i]+[objSizes[i]*0.05+0.7])
 rospy.sleep(1.0)
+locations = torch.tensor(locations, dtype=torch.float)
+
+x = torch.tensor(node.getDepthImage(8), dtype=torch.float)
+objs, locs, _ = utils.find_objects(x, opts["size"])
 
 transform = data.default_transform(size=opts["size"], affine=False, mean=0.279, std=0.0094)
-x = torch.tensor(node.getDepthImage(8), dtype=torch.float)
-objs, locs = utils.find_objects(x, opts["size"])
-objs = transform(objs)
+for i, o in enumerate(objs):
+    objs[i] = transform(o)[0]
 objs = objs.to(device)
 
 locs = torch.cat([locs.float(), torch.ones(locs.shape[0], 1, device=locs.device)], dim=1)
 locs = torch.matmul(locs, H.T)
 locs = locs / locs[:, 2].reshape(-1, 1)
 
+_, indices = torch.cdist(locs[:, :2], locations).min(dim=1)
 obj_infos = []
 comparisons = []
 with torch.no_grad():
     for i, obj in enumerate(objs):
         cat = model.encoder1(obj.unsqueeze(0).unsqueeze(0))
-        print("Category: (%d %d), Location: (%.5f %.5f)" % (cat[0, 0], cat[0, 1], locs[i, 0].item(), locs[i, 1].item()))
+        # TODO: this uses true location and size.
+        print("Category: (%d %d), Location: (%.5f %.5f)" % (cat[0, 0], cat[0, 1], locations[indices[i], 0], locations[indices[i], 1]))
         info = {}
         info["name"] = "O{}".format(i+1)
-        info["loc"] = (locs[i, 0].item(), locs[i, 1].item())
+        info["loc"] = (locations[indices[i], 0].item(), locations[indices[i], 1].item())
+        info["size"] = objSizes[indices[i]]*0.1
         info["type"] = "objtype{}".format(utils.binary_to_decimal([int(cat[0, 0]), int(cat[0, 1])]))
-        obj_infos.append(info)
+
+        obj_infos.apped(info)
         for j in range(len(objs)):
             if i != j:
                 rel = model.encoder2(torch.stack([obj, objs[j]]).unsqueeze(0))[0, 0]
@@ -84,9 +92,9 @@ if os.path.exists(file_obj):
 print("(define (problem dom1) (:domain stack)", file=open(file_loc, "a"))
 print(str(len(obj_infos)), file=open(file_obj, "a"))
 object_str = "\t(:objects base"
-init_str = "\t(:init  (stackloc base) (objtype2 base)\n"
+init_str = "\t(:init  (stackloc base) (objtype3 base)\n"
 for obj_i in obj_infos:
-    print(obj_i["name"] + " %.5f" % obj_i["loc"][0] + " %.5f" % obj_i["loc"][1], file=open(file_obj, "a"))
+    print("%s %.5f %.5f %.5f" % (obj_i["name"], obj_i["loc"][0], obj_i["loc"][1], obj_i["size"]), file=open(file_obj, "a"))
     object_str += " " + obj_i["name"]
     init_str += "\t\t(pickloc " + obj_i["name"] + ") (" + obj_i["type"] + " " + obj_i["name"] + ")\n"
 object_str += ")"
