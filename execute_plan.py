@@ -24,9 +24,14 @@ for i in range(N):
     objNames.append(name)
     objLocs.append([float(x), float(y)])
 
+print("Plan success probability: %.2f" % float(lines[N+1].split(":")[1]))
+if lines[N+1] == "not found.":
+    print("Cannot find a plan which satisfies the objective.")
+    exit()
+
 sizes = [0.1, 0.18, 0.1]
 base_level = 0.7
-for p in lines[N+1:]:
+for p in lines[N+2:]:
     _, target, base = p.split()
     base_idx = objNames.index(base)
     target_idx = objNames.index(target)
