@@ -19,8 +19,10 @@ model.load(args.ckpt, "_best", 1)
 
 transform = data.default_transform(size=opts["size"], affine=False, mean=0.279, std=0.0094)
 trainset = data.ImageFirstLevel(transform=transform)
-loader = torch.utils.data.DataLoader(trainset, batch_size=50, shuffle=True)
+loader = torch.utils.data.DataLoader(trainset, batch_size=2400, shuffle=False)
 objects = iter(loader).next()["observation"]
+objects = objects.reshape(5, 10, 3, 4, 4, opts["size"], opts["size"])
+objects = objects[:, :, 0, torch.randint(0, 4, (1, )), torch.randint(0, 4, (1, )), :, :].reshape(-1, 1, opts["size"], opts["size"])
 model.encoder1.eval()
 with torch.no_grad():
     codes = model.encoder1(objects)
