@@ -86,13 +86,18 @@ class EffectRegressorMLP:
         self.encoder2 = build_encoder(opts, 2).to(self.device)
         self.decoder1 = MLP([opts["code1_dim"] + 3] + [opts["hidden_dim"]] * opts["depth"] + [3]).to(self.device)
         self.decoder2 = MLP([opts["code2_dim"] + opts["code1_dim"]*2] + [opts["hidden_dim"]] * opts["depth"] + [6]).to(self.device)
-        self.optimizer = torch.optim.Adam(lr=opts["learning_rate"],
-                                          params=[
-                                              {"params": self.encoder1.parameters()},
-                                              {"params": self.encoder2.parameters()},
-                                              {"params": self.decoder1.parameters()},
-                                              {"params": self.decoder2.parameters()}],
-                                          amsgrad=True)
+        self.optimizer1 = torch.optim.Adam(lr=opts["learning_rate"],
+                                           params=[
+                                               {"params": self.encoder1.parameters()},
+                                               {"params": self.decoder1.parameters()}],
+                                           amsgrad=True)
+
+        self.optimizer2 = torch.optim.Adam(lr=opts["learning_rate"],
+                                           params=[
+                                               {"params": self.encoder2.parameters()},
+                                               {"params": self.decoder2.parameters()}],
+                                           amsgrad=True)
+
         self.criterion = torch.nn.MSELoss()
         self.iteration = 0
         self.save_path = opts["save"]
@@ -124,15 +129,18 @@ class EffectRegressorMLP:
     def one_pass_optimize(self, loader, level):
         running_avg_loss = 0.0
         for i, sample in enumerate(loader):
-            self.optimizer.zero_grad()
             if level == 1:
+                self.optimizer1.zero_grad()
                 loss = self.loss1(sample)
+                loss.backward()
+                self.optimizer1.step()
             else:
+                self.optimizer2.zero_grad()
                 loss = self.loss2(sample)
-            loss.backward()
+                loss.backward()
+                self.optimizer2.step()
             running_avg_loss += loss.item()
             self.iteration += 1
-            self.optimizer.step()
         return running_avg_loss/i
 
     def train(self, epoch, loader, level):
