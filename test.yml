@@ -1,4 +1,5 @@
-learning_rate: 0.001
+learning_rate1: 0.001
+learning_rate2: 0.001
 batch_size1: 30
 batch_size2: 50
 epoch1: 2
