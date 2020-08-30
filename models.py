@@ -86,13 +86,13 @@ class EffectRegressorMLP:
         self.encoder2 = build_encoder(opts, 2).to(self.device)
         self.decoder1 = MLP([opts["code1_dim"] + 3] + [opts["hidden_dim"]] * opts["depth"] + [3]).to(self.device)
         self.decoder2 = MLP([opts["code2_dim"] + opts["code1_dim"]*2] + [opts["hidden_dim"]] * opts["depth"] + [6]).to(self.device)
-        self.optimizer1 = torch.optim.Adam(lr=opts["learning_rate"],
+        self.optimizer1 = torch.optim.Adam(lr=opts["learning_rate1"],
                                            params=[
                                                {"params": self.encoder1.parameters()},
                                                {"params": self.decoder1.parameters()}],
                                            amsgrad=True)
 
-        self.optimizer2 = torch.optim.Adam(lr=opts["learning_rate"],
+        self.optimizer2 = torch.optim.Adam(lr=opts["learning_rate2"],
                                            params=[
                                                {"params": self.encoder2.parameters()},
                                                {"params": self.decoder2.parameters()}],
