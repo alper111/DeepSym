@@ -68,7 +68,7 @@ def tree_to_code(tree, feature_names, effect_names, obj_names):
         else:
             print("rules:", rules)
             obj1_list, obj2_list, comparison = rule_to_code(rules, obj_names)
-            precond = ":precondition (and (pickloc ?above) (stackloc ?below) "
+            precond = ":precondition (and (not (gain)) (pickloc ?above) (stackloc ?below) "
             if len(obj1_list) > 1:
                 precond += "(or"
                 for obj1 in obj1_list:
@@ -107,7 +107,7 @@ def tree_to_code(tree, feature_names, effect_names, obj_names):
                     effect += "\n\t\t\t\t 1.000 "
 
                 if effect_names[i] == "stacked" or effect_names[i] == "inserted":
-                    effect += "(and (%s) (instack ?above) (stackloc ?above) (not (stackloc ?below)))" % effect_names[i]
+                    effect += "(and (%s) (gain) (instack ?above) (stackloc ?above) (not (stackloc ?below)))" % effect_names[i]
                 else:
                     effect += "(%s)" % (effect_names[i])
             effect += ")"

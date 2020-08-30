@@ -35,7 +35,8 @@ H = torch.load("H.pt")
 
 # GENERATE A RANDOM SCENE
 NUM_OBJECTS = 3
-objTypes = np.random.randint(1, 6, (NUM_OBJECTS, ))
+# objTypes = np.random.randint(1, 6, (NUM_OBJECTS, ))
+objTypes = [2, 2, 2]
 objSizes = np.random.uniform(1.0, 2.0, (NUM_OBJECTS, ))
 yaxis = np.linspace(-0.4, 0.4, NUM_OBJECTS)
 xaxis = np.random.uniform(-1.0, -0.5, (NUM_OBJECTS, ))
@@ -72,7 +73,7 @@ with torch.no_grad():
         info["size"] = objSizes[indices[i]]*0.1
         info["type"] = "objtype{}".format(utils.binary_to_decimal([int(cat[0, 0]), int(cat[0, 1])]))
 
-        obj_infos.apped(info)
+        obj_infos.append(info)
         for j in range(len(objs)):
             if i != j:
                 rel = model.encoder2(torch.stack([obj, objs[j]]).unsqueeze(0))[0, 0]
@@ -91,8 +92,8 @@ if os.path.exists(file_obj):
     os.remove(file_obj)
 print("(define (problem dom1) (:domain stack)", file=open(file_loc, "a"))
 print(str(len(obj_infos)), file=open(file_obj, "a"))
-object_str = "\t(:objects base"
-init_str = "\t(:init  (stackloc base) (objtype3 base)\n"
+object_str = "\t(:objects"
+init_str = "\t(:init\n"
 for obj_i in obj_infos:
     print("%s %.5f %.5f %.5f" % (obj_i["name"], obj_i["loc"][0], obj_i["loc"][1], obj_i["size"]), file=open(file_obj, "a"))
     object_str += " " + obj_i["name"]
@@ -100,8 +101,6 @@ for obj_i in obj_infos:
 object_str += ")"
 for c_i in comparisons:
     init_str += "\t\t" + c_i + "\n"
-for obj_i in obj_infos:
-    init_str += "\t\t(relation1 %s base)\n" % obj_i["name"]
 init_str += "\t\t(H0)\n"
 init_str += "\t\t(S0)\n"
 init_str += "\t)"
@@ -110,4 +109,3 @@ goal_str = "\t(:goal (and %s))\n)" % args.goal
 print(object_str, file=open(file_loc, "a"))
 print(init_str, file=open(file_loc, "a"))
 print(goal_str, file=open(file_loc, "a"))
-# need to handle base!

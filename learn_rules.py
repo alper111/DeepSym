@@ -47,7 +47,7 @@ pretext += "\t(:predicates"
 
 for i in range(K):
     pretext += "\n\t\t(%s) " % effect_names[i]
-pretext += "\n\t\t(pickloc ?x)\n\t\t(instack ?x)\n\t\t(stackloc ?x)\n\t\t(relation0 ?x ?y)\n\t\t(relation1 ?x ?y)"
+pretext += "(gain) (base) \n\t\t(pickloc ?x)\n\t\t(instack ?x)\n\t\t(stackloc ?x)\n\t\t(relation0 ?x ?y)\n\t\t(relation1 ?x ?y)"
 for i in range(2**CODE_DIM):
     pretext += "\n\t\t(" + obj_names[utils.decimal_to_binary(i, length=CODE_DIM)] + " ?x)"
 for i in range(7):
@@ -65,11 +65,15 @@ for i, (precond, effect) in enumerate(pddl_code):
     print("\t)", file=open(file_loc, "a"))
 for i in range(6):
     print("\t(:action gainheight%d" % (i+1), file=open(file_loc, "a"))
-    print("\t\t:precondition (and (stacked) (H%d))" % i, file=open(file_loc, "a"))
-    print("\t\t:effect (and (not (H%d)) (H%d) (not (stacked)))\n\t)" % (i, i+1), file=open(file_loc, "a"))
+    print("\t\t:precondition (and (stacked) (gain) (H%d))" % i, file=open(file_loc, "a"))
+    print("\t\t:effect (and (not (H%d)) (H%d) (not (stacked)) (not (gain)))\n\t)" % (i, i+1), file=open(file_loc, "a"))
 for i in range(6):
     print("\t(:action gainstack%d" % (i+1), file=open(file_loc, "a"))
     print("\t\t:precondition (and (inserted) (S%d))" % i, file=open(file_loc, "a"))
-    print("\t\t:effect (and (not (S%d)) (S%d) (not (inserted)))\n\t)" % (i, i+1), file=open(file_loc, "a"))
-
+    print("\t\t:effect (and (not (S%d)) (S%d) (not (inserted)) (not (gain)))\n\t)" % (i, i+1), file=open(file_loc, "a"))
+print("\t(:action makebase", file=open(file_loc, "a"))
+print("\t\t:parameters (?obj)", file=open(file_loc, "a"))
+print("\t\t:precondition (not (base))", file=open(file_loc, "a"))
+print("\t\t:effect (and (base) (not (pickloc ?obj)) (stackloc ?obj) (H1))", file=open(file_loc, "a"))
+print("\t)", file=open(file_loc, "a"))
 print(")", file=open(os.path.join(opts["save"], "domain.pddl"), "a"))

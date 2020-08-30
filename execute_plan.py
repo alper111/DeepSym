@@ -40,7 +40,7 @@ for p in lines[N+2:]:
     base_loc = objLocs[base_idx]
     target_loc = objLocs[target_idx]
     node.move(target_loc+[1.0, 0., 0., 0., 1.])
-    node.move(target_loc+[0.7+0.95*objSizes[target_idx], 0., 0., 0., 1.])
+    node.move(target_loc+[0.7+0.85*objSizes[target_idx], 0., 0., 0., 1.])
     node.handGraspPose()
     base_level += objSizes[base_idx]
     node.move(target_loc+[base_level+objSizes[target_idx]+0.05, 0., 0., 0., 1.])
