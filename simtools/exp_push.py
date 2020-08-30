@@ -84,12 +84,12 @@ for obj_i in range(1, 6):
                     node.startSimulation()
                     rospy.sleep(1.0)
 
-                    np.save("obs_prev.npy", obs_prev)
-                    np.save("obs_next.npy", obs_next)
-                    np.save("pos_prev.npy", pos_prev)
-                    np.save("pos_next.npy", pos_next)
-                    np.save("force_readings.npy", force_readings)
-                    np.save("actions.npy", action)
+                    np.save("data/exploration_first/obs_prev.npy", obs_prev)
+                    np.save("data/exploration_first/obs_next.npy", obs_next)
+                    np.save("data/exploration_first/pos_prev.npy", pos_prev)
+                    np.save("data/exploration_first/pos_next.npy", pos_next)
+                    np.save("data/exploration_first/force_readings.npy", force_readings)
+                    np.save("data/exploration_first/actions.npy", action)
 node.stopSimulation()
 
 print("simulation stopped.")
