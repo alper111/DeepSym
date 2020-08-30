@@ -47,7 +47,7 @@ pretext += "\t(:predicates"
 
 for i in range(K):
     pretext += "\n\t\t(%s) " % effect_names[i]
-pretext += "\n\t\t(pickloc ?x)\n\t\t(instack ?x)\n\t\t(stackloc ?x)\n\t\t(relation0 ?x ?y)"
+pretext += "\n\t\t(pickloc ?x)\n\t\t(instack ?x)\n\t\t(stackloc ?x)\n\t\t(relation0 ?x ?y)\n\t\t(relation1 ?x ?y)"
 for i in range(2**CODE_DIM):
     pretext += "\n\t\t(" + obj_names[utils.decimal_to_binary(i, length=CODE_DIM)] + " ?x)"
 for i in range(7):

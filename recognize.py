@@ -37,9 +37,9 @@ H = torch.load("H.pt")
 NUM_OBJECTS = 3
 # objTypes = np.random.randint(1, 6, (NUM_OBJECTS, ))
 # objSizes = np.random.uniform(1.0, 2.0, (NUM_OBJECTS, ))
-objTypes = [5, 5, 2]
-objSizes = [1.0, 1.9, 1.0]
-locations = [[-0.8, -0.2], [-0.8, 0.0], [-0.8, 0.2]]
+objTypes = [3, 5, 5]
+objSizes = [1, 1.4, 2.0]
+locations = [[-0.6, -0.25], [-0.8, 0.0], [-0.7, 0.25]]
 for i in range(NUM_OBJECTS):
     node.generateObject(objTypes[i], objSizes[i], locations[i]+[objSizes[i]*0.05+0.7])
 rospy.sleep(1.0)
@@ -71,7 +71,7 @@ with torch.no_grad():
                 if rel == -1:
                     comparisons.append("(relation0 O%d O%d)" % (i+1, j+1))
                 else:
-                    comparisons.append("(relation0 O%d O%d)" % (j+1, i+1))
+                    comparisons.append("(relation1 O%d O%d)" % (i+1, j+1))
 print(obj_infos)
 print(comparisons)
 
@@ -93,7 +93,7 @@ object_str += ")"
 for c_i in comparisons:
     init_str += "\t\t" + c_i + "\n"
 for obj_i in obj_infos:
-    init_str += "\t\t(relation0 %s base)\n" % obj_i["name"]
+    init_str += "\t\t(relation1 %s base)\n" % obj_i["name"]
 init_str += "\t\t(H0)\n"
 init_str += "\t\t(S0)\n"
 init_str += "\t)"

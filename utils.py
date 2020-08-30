@@ -143,13 +143,13 @@ def rule_to_code(rule, obj_names):
     obj2_list = [obj_names[x] for x in possible_obj_2]
 
     if indices[4] == -1:
-        comparison = None
+        comparison = "(or (relation0 ?above ?below) (relation1 ?above ?below))"
     else:
         sign = np.sign(rule[indices[4]])
         if sign == -1:
             comparison = "(relation0 ?above ?below)"
         elif sign == 1:
-            comparison = "(relation0 ?below ?above)"
+            comparison = "(relation1 ?above ?below)"
         else:
             print("hata")
             exit()
