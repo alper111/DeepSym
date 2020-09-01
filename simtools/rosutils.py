@@ -101,6 +101,11 @@ class RosNode:
         data = np.array(data, dtype=np.float32).reshape(128, 128)
         return data[margin:(128-margin), margin:(128-margin)]
 
+    def getRGBImage(self, margin=0):
+        data = rospy.wait_for_message("/kinectRGB", Float32MultiArray).data
+        data = np.array(data, dtype=np.float).reshape(480, 640, 3)
+        return data[margin:(480-margin), margin:(640-margin)]
+
     def getFingerForce(self):
         data = rospy.wait_for_message("/getFingerForce", Float32MultiArray).data
         return list(data)
