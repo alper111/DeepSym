@@ -1,8 +1,4 @@
-import sys
 import argparse
-import rospy
-import numpy as np
-from scipy.spatial.transform import Rotation
 from simtools.rosutils import RosNode
 
 
