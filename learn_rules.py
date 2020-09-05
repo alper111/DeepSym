@@ -57,7 +57,7 @@ for i in range(7):
 pretext += "\n\t)"
 print(pretext, file=open(file_loc, "a"))
 
-action_template = "\t(:action act%d\n\t\t:parameters (?above ?below)"
+action_template = "\t(:action stack%d\n\t\t:parameters (?below ?above)"
 for i, (precond, effect) in enumerate(pddl_code):
     print(action_template % i, file=open(file_loc, "a"))
     print("\t\t"+precond, file=open(file_loc, "a"))
