@@ -114,7 +114,7 @@ class EffectRegressorMLP:
         return loss
 
     def loss2(self, sample):
-        obs = sample["object"].to(self.device)
+        obs = sample["observation"].to(self.device)
         effect = sample["effect"].to(self.device)
 
         with torch.no_grad():
