@@ -16,7 +16,7 @@ is_plan = False
 for line in lines:
     if line[:5] == "    +":
         is_plan = True
-        if line[6] == "a":
+        if line[6] == "s":
             current_plan.append(line[:-1])
     elif is_plan:
         is_plan = False
