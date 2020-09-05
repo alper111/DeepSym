@@ -30,7 +30,7 @@ if lines[N+1] == "not found.":
 base_level = 0.7
 for p in lines[N+2:]:
     node.initArmPose()
-    _, target, base = p.split()
+    _, base, target = p.split()
     base_idx = objNames.index(base)
     target_idx = objNames.index(target)
     base_loc = objLocs[base_idx]
