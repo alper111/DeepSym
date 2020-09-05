@@ -72,18 +72,18 @@ def tree_to_code(tree, feature_names, effect_names, obj_names):
             if len(obj1_list) > 1:
                 precond += "(or"
                 for obj1 in obj1_list:
-                    precond += " (%s ?above)" % obj1
+                    precond += " (%s ?below)" % obj1
                 precond += ") "
             else:
-                precond += "(%s ?above) " % obj1_list[0]
+                precond += "(%s ?below) " % obj1_list[0]
 
             if len(obj2_list) > 1:
                 precond += "(or"
                 for obj2 in obj2_list:
-                    precond += " (%s ?below)" % obj2
+                    precond += " (%s ?above)" % obj2
                 precond += ")"
             else:
-                precond += "(%s ?below)" % obj2_list[0]
+                precond += "(%s ?above)" % obj2_list[0]
 
             if comparison is not None:
                 precond += " %s" % comparison
@@ -143,13 +143,13 @@ def rule_to_code(rule, obj_names):
     obj2_list = [obj_names[x] for x in possible_obj_2]
 
     if indices[4] == -1:
-        comparison = "(or (relation0 ?above ?below) (relation1 ?above ?below))"
+        comparison = "(or (relation0 ?below ?above) (relation1 ?below ?above))"
     else:
         sign = np.sign(rule[indices[4]])
         if sign == -1:
-            comparison = "(relation0 ?above ?below)"
+            comparison = "(relation0 ?below ?above)"
         elif sign == 1:
-            comparison = "(relation1 ?above ?below)"
+            comparison = "(relation1 ?below ?above)"
         else:
             print("hata")
             exit()
@@ -233,16 +233,17 @@ def find_objects(img, window_size):
     half_window = window_size // 2
     objects = []
     locations = []
-    sizes = []
+    depths = []
     ground = img.max()
     mask = img < (img.min() + 0.005)
     is_empty = mask.all()
     while not is_empty:
-        sizes.append(ground - img.min())
         h_i, w_i = mask.nonzero()[0]
         pp = cc_pix_avg(mask, h_i.item(), w_i.item())
         h_c, w_c = np.mean(pp, axis=0).round().astype(np.int)
         locations.append([h_c, w_c])
+        # depths.append(img[int(h_c), int(w_c)].item())
+        depths.append(img.min())
         h_c = np.clip(h_c, half_window, width-half_window)
         w_c = np.clip(w_c, half_window, width-half_window)
         objects.append(img[(h_c-half_window):(h_c+half_window), (w_c-half_window):(w_c+half_window)].clone())
@@ -252,5 +253,6 @@ def find_objects(img, window_size):
     if len(objects) > 0:
         objects = torch.stack(objects)
         locations = torch.tensor(locations)
-        sizes = torch.stack(sizes) * 3.47632
-    return objects, locations, sizes
+        # sizes = torch.stack(sizes) * 3.47632
+        depths = torch.tensor(depths)
+    return objects, locations, depths
