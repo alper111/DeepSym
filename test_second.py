@@ -3,6 +3,7 @@ import os
 import torch
 import yaml
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 import data
 from models import EffectRegressorMLP
 
@@ -19,9 +20,10 @@ model.load(args.ckpt, "_best", 2)
 model.encoder2.eval()
 
 transform = data.default_transform(size=opts["size"], affine=False, mean=0.279, std=0.0094)
-trainset = data.SecondLevelDataset(transform=transform)
+trainset = data.ImageSecondLevel(transform=transform)
+trainset.train = False
 loader = torch.utils.data.DataLoader(trainset, batch_size=36, shuffle=True)
-objects = iter(loader).next()["object"]
+objects = iter(loader).next()["observation"]
 with torch.no_grad():
     codes = model.encoder2(objects)
 
@@ -33,3 +35,6 @@ for i in range(6):
         ax[i, j].axis("off")
         ax[i, j].set_title(codes[idx].numpy())
 plt.show()
+pp = PdfPages("paired.pdf")
+pp.savefig()
+pp.close()
