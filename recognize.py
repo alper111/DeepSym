@@ -36,11 +36,17 @@ H = torch.load("H.pt")
 # GENERATE A RANDOM SCENE
 NUM_OBJECTS = 3
 # objTypes = np.random.randint(1, 6, (NUM_OBJECTS, ))
-objTypes = [2, 2, 2]
-objSizes = np.random.uniform(1.0, 2.0, (NUM_OBJECTS, ))
-yaxis = np.linspace(-0.4, 0.4, NUM_OBJECTS)
-xaxis = np.random.uniform(-1.0, -0.5, (NUM_OBJECTS, ))
-locations = np.vstack([xaxis, yaxis]).T.tolist()
+objTypes = [5, 5, 5]
+# objSizes = np.random.uniform(1.0, 2., (NUM_OBJECTS, ))
+objSizes = [1., 1.5, 2.]
+locations = [
+    [-0.69, -0.09],
+    [-0.9, -0.35],
+    [-0.45, 0.175],
+    [-0.45, -0.35],
+    [-0.9, 0.175]
+]
+locations = locations[:NUM_OBJECTS]
 
 for i in range(NUM_OBJECTS):
     node.generateObject(objTypes[i], objSizes[i], locations[i]+[objSizes[i]*0.05+0.7])
@@ -105,7 +111,7 @@ init_str += "\t\t(H0)\n"
 init_str += "\t\t(S0)\n"
 init_str += "\t)"
 
-goal_str = "\t(:goal (and %s))\n)" % args.goal
+goal_str = "\t(:goal (and %s (not (stacked)) (not (inserted))))\n)" % args.goal
 print(object_str, file=open(file_loc, "a"))
 print(init_str, file=open(file_loc, "a"))
 print(goal_str, file=open(file_loc, "a"))
