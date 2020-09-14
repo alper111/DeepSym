@@ -21,8 +21,10 @@ model.encoder1.eval()
 model.encoder2.eval()
 
 transform = data.default_transform(size=opts["size"], affine=False, mean=0.279, std=0.0094)
-relations = torch.load("data/relations.pt")
-X = torch.load("data/objectsZ.pt")[:, 12:13]
+X = torch.load("data/img/obs_prev_z.pt")
+X = X.reshape(5, 10, 3, 4, 4, 42, 42)
+X = X[:, :, 0, 2, 2]
+X = X.reshape(-1, 1, 42, 42)
 B, _, H, W = X.shape
 Y = torch.empty(B, 1, opts["size"], opts["size"])
 
