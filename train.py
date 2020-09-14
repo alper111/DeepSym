@@ -23,7 +23,7 @@ device = torch.device(opts["device"])
 
 # load the first level data
 transform = data.default_transform(size=opts["size"], affine=True, mean=0.279, std=0.0094)
-trainset = data.ImageFirstLevel(transform=transform)
+trainset = data.SingleObjectData(transform=transform)
 loader = torch.utils.data.DataLoader(trainset, batch_size=opts["batch_size1"], shuffle=True)
 
 model = EffectRegressorMLP(opts)
@@ -38,7 +38,7 @@ model.load(opts["save"], "_best", 1)
 
 # load the second level data
 transform = data.default_transform(size=opts["size"], affine=True, mean=0.279, std=0.0094)
-trainset = data.ImageSecondLevel(transform=transform)
+trainset = data.PairedObjectData(transform=transform)
 loader = torch.utils.data.DataLoader(trainset, batch_size=opts["batch_size2"], shuffle=True)
 model.print_model(2)
 model.train(opts["epoch2"], loader, 2)

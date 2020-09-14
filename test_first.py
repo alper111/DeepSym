@@ -1,9 +1,10 @@
 import argparse
 import os
 import torch
+import torchvision
 import yaml
-import matplotlib.pyplot as plt
 import data
+import utils
 from models import EffectRegressorMLP
 
 parser = argparse.ArgumentParser("test encoded model.")
@@ -18,20 +19,31 @@ model = EffectRegressorMLP(opts)
 model.load(args.ckpt, "_best", 1)
 
 transform = data.default_transform(size=opts["size"], affine=False, mean=0.279, std=0.0094)
-trainset = data.ImageFirstLevel(transform=transform)
-loader = torch.utils.data.DataLoader(trainset, batch_size=2400, shuffle=False)
-objects = iter(loader).next()["observation"]
-objects = objects.reshape(5, 10, 3, 4, 4, opts["size"], opts["size"])
-objects = objects[:, :, 0, torch.randint(0, 4, (1, )), torch.randint(0, 4, (1, )), :, :].reshape(-1, 1, opts["size"], opts["size"])
+trainset = data.SingleObjectData(transform=transform)
+loader = torch.utils.data.DataLoader(trainset, batch_size=2400, shuffle=True)
+sample = iter(loader).next()
+objects = sample["observation"].reshape(5, 10, 3, 4, 4, opts["size"], opts["size"])
+objects = objects[:, :, 0].reshape(-1, 1, 42, 42)
+colored = [[], [], [], []]
 model.encoder1.eval()
 with torch.no_grad():
-    codes = model.encoder1(objects)
+    done = False
+    it = 0
+    while not done:
+        c = model.encoder1(objects[it].reshape(1, 1, 42, 42))
+        cat = int(utils.binary_to_decimal(c[0]))
+        if len(colored[cat]) < 10:
+            colored[cat].append(objects[it].clone())
+        it += 1
 
-fig, ax = plt.subplots(5, 10, figsize=(12, 7))
-for i in range(5):
-    for j in range(10):
-        idx = i * 10 + j
-        ax[i, j].imshow(objects[idx, 0]*0.0094+0.279)
-        ax[i, j].axis("off")
-        ax[i, j].set_title(codes[idx].numpy())
-plt.show()
+        done = True
+        for i in range(4):
+            if len(colored[i]) < 10:
+                done = False
+                break
+
+for i in range(4):
+    colored[i] = torch.stack(colored[i])
+colored = torch.stack(colored)
+colored = colored.reshape(-1, 1, 42, 42)
+torchvision.utils.save_image(colored, "colored-objects.png", nrow=10, normalize=True)

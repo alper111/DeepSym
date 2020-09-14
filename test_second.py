@@ -16,11 +16,13 @@ opts = yaml.safe_load(open(file_loc, "r"))
 opts["device"] = "cpu"
 
 model = EffectRegressorMLP(opts)
+model.load(args.ckpt, "_best", 1)
 model.load(args.ckpt, "_best", 2)
+model.encoder1.eval()
 model.encoder2.eval()
 
 transform = data.default_transform(size=opts["size"], affine=False, mean=0.279, std=0.0094)
-trainset = data.ImageSecondLevel(transform=transform)
+trainset = data.PairedObjectData(transform=transform)
 trainset.train = False
 loader = torch.utils.data.DataLoader(trainset, batch_size=36, shuffle=True)
 objects = iter(loader).next()["observation"]
