@@ -29,7 +29,6 @@ file = open(os.path.join(opts["save"], "tree.pkl"), "wb")
 pickle.dump(tree, file)
 file.close()
 
-# obj_names = {(-1, 1): "hollow", (1, -1): "stable", (1, 1): "sphere", (-1, -1): "cylinder"}
 CODE_DIM = 2
 obj_names = {}
 for i in range(2**CODE_DIM):
