@@ -3,7 +3,7 @@ from torchvision import transforms
 import numpy as np
 
 
-class ImageFirstLevel(torch.utils.data.Dataset):
+class SingleObjectData(torch.utils.data.Dataset):
     def __init__(self, transform=None):
         self.transform = transform
         self.observation = torch.load("data/img/obs_prev_z.pt").unsqueeze(1)
@@ -27,7 +27,7 @@ class ImageFirstLevel(torch.utils.data.Dataset):
         return sample
 
 
-class ImageSecondLevel(torch.utils.data.Dataset):
+class PairedObjectData(torch.utils.data.Dataset):
     def __init__(self, transform=None):
         self.transform = transform
         self.train = True
@@ -66,68 +66,6 @@ class ImageSecondLevel(torch.utils.data.Dataset):
         else:
             sample["observation"] = torch.stack([img_i, img_j])
         sample["effect"] = self.effect[idx]
-        return sample
-
-
-class FirstLevelDataset(torch.utils.data.Dataset):
-    """ custom pytorch dataset class for first level object-action-effect data """
-    def __init__(self, transform=None):
-        self.transform = transform
-        self.action_names = np.load("data/action_names.npy")
-        self.obj_names = np.load("data/obj_names.npy")
-
-        self.objects = torch.load("data/objectsZ.pt")
-        self.targets = torch.load("data/targets.pt")
-        self.actions = torch.load("data/actions.pt")
-        self.effects = torch.load("data/effects_1.pt")
-
-        self.effects = torch.cat([self.effects[:, :2], self.effects[:, 3:]], dim=1)
-        self.eff_mu = self.effects.mean(dim=0)
-        self.eff_std = self.effects.std(dim=0)
-        self.effects = (self.effects - self.eff_mu) / (self.eff_std + 1e-6)
-
-    def __len__(self):
-        return len(self.targets)
-
-    def __getitem__(self, idx):
-        sample = {}
-        sample["object"] = self.objects[self.targets[idx], np.random.randint(0, 25)]
-        # sample["object"] = self.objects[self.targets[idx], 12]
-        sample["object"].unsqueeze_(0)
-        if self.transform:
-            sample["object"] = self.transform(sample["object"])
-        sample["action"] = self.actions[idx]
-        sample["effect"] = self.effects[idx]
-        return sample
-
-
-class SecondLevelDataset(torch.utils.data.Dataset):
-    """ custom pytorch dataset class for second level object-action-effect data """
-    def __init__(self, transform=None):
-        self.transform = transform
-        self.action_names = np.load("data/action_names.npy")
-        self.obj_names = np.load("data/obj_names.npy")
-
-        self.objects = torch.load("data/objectsZ.pt")
-        self.relations = torch.load("data/relations.pt")
-        self.effects = torch.load("data/effects_2.pt")
-
-        self.effects = self.effects.abs()
-        self.eff_mu = self.effects.mean(dim=0)
-        self.eff_std = self.effects.std(dim=0)
-        self.effects = (self.effects - self.eff_mu) / (self.eff_std + 1e-6)
-
-    def __len__(self):
-        return len(self.relations)
-
-    def __getitem__(self, idx):
-        sample = {}
-        x = self.objects[self.relations[idx], np.random.randint(0, 25, (2,))]
-        if self.transform:
-            sample["object"] = torch.cat([self.transform(x[0]), self.transform(x[1])])
-        else:
-            sample["object"] = x
-        sample["effect"] = self.effects[idx]
         return sample
 
 
