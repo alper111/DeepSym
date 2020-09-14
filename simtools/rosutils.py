@@ -61,10 +61,10 @@ class RosNode:
 
     def handFistPose(self):
         self._command_hand([-90, -90, 85, 85, 85, 90, 90, 90])
-    
+
     def handOpenSimple(self):
         self._grasp_command(0.2)
-    
+
     def handGraspSimple(self):
         self._grasp_command(-0.2)
 
@@ -115,7 +115,7 @@ class RosNode:
         msg.data = np.radians(position)
         self._hand_pub.publish(msg)
         self.wait()
-    
+
     def _grasp_command(self, x):
         msg = Float32()
         msg.data = x
