@@ -3,6 +3,7 @@ import os
 import torch
 import torchvision
 import yaml
+import matplotlib.pyplot as plt
 import data
 import utils
 from models import EffectRegressorMLP
@@ -32,18 +33,21 @@ with torch.no_grad():
     while not done:
         c = model.encoder1(objects[it].reshape(1, 1, 42, 42))
         cat = int(utils.binary_to_decimal(c[0]))
-        if len(colored[cat]) < 10:
+        if len(colored[cat]) < 20:
             colored[cat].append(objects[it].clone())
         it += 1
 
         done = True
         for i in range(4):
-            if len(colored[i]) < 10:
+            if len(colored[i]) < 20:
                 done = False
                 break
 
 for i in range(4):
     colored[i] = torch.stack(colored[i])
 colored = torch.stack(colored)
-colored = colored.reshape(-1, 1, 42, 42)
-torchvision.utils.save_image(colored, "colored-objects.png", nrow=10, normalize=True)
+colored = colored.reshape(-1, 42, 42)
+colored = (colored - colored.min()) / (colored.max() - colored.min())
+cm = plt.cm.plasma
+colored = torch.tensor(cm(colored.numpy()), dtype=torch.float).permute(0, 3, 1, 2)[:, :3]
+torchvision.utils.save_image(colored, "colored-objects.png", nrow=20)
