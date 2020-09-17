@@ -34,19 +34,18 @@ model.encoder2.eval()
 H = torch.load("H.pt")
 
 # GENERATE A RANDOM SCENE
-NUM_OBJECTS = 3
-# objTypes = np.random.randint(1, 6, (NUM_OBJECTS, ))
-objTypes = [5, 5, 5]
-# objSizes = np.random.uniform(1.0, 2., (NUM_OBJECTS, ))
-objSizes = [1., 1.5, 2.]
-locations = [
+NUM_OBJECTS = 5
+objTypes = np.random.randint(1, 6, (NUM_OBJECTS, ))
+objSizes = np.random.uniform(1.0, 2, (5, )).tolist()
+locations = np.array([
     [-0.69, -0.09],
     [-0.9, -0.35],
     [-0.45, 0.175],
     [-0.45, -0.35],
     [-0.9, 0.175]
-]
-locations = locations[:NUM_OBJECTS]
+])
+locations = locations[np.random.permutation(5)]
+locations = locations[:NUM_OBJECTS].tolist()
 
 for i in range(NUM_OBJECTS):
     node.generateObject(objTypes[i], objSizes[i], locations[i]+[objSizes[i]*0.05+0.7])
