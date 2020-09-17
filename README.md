@@ -87,5 +87,9 @@ A pre-trained model is in `save/stable1`. So, you can skip training steps if you
 3. Randomly generate problems and solve for the goal with `make_plan.sh`
 
 __Examples__:  
-`./make_plan.sh opts.yaml "(H3) (S4)"`  
-`./make_plan.sh opts.yaml "(H4) (S4)"`
+`./make_plan.sh save/stable1/opts.yaml "(H3) (S4)"`  
+`./make_plan.sh save/stable1/opts.yaml "(H4) (S4)"`
+
+4. Execute the found plan with `execute_plan.py`. If the plan has zero probability, then it will not be executed.
+
+`python execute_plan.py -p save/stable1/plan.txt`
