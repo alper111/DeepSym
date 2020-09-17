@@ -1,0 +1,29 @@
+batch_norm: true
+batch_size1: 128
+batch_size2: 128
+cnn: true
+code1_dim: 2
+code2_dim: 1
+depth: 2
+device: cuda
+epoch1: 300
+epoch2: 300
+filters1:
+- 1
+- 32
+- 64
+- 128
+- 256
+filters2:
+- 2
+- 32
+- 64
+- 128
+- 256
+hidden_dim: 128
+learning_rate1: 5.0e-05
+learning_rate2: 5.0e-05
+load: null
+save: save/stable1
+size: 42
+time: Sat Sep  5 21:25:39 2020
