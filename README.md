@@ -1,6 +1,6 @@
 # End-to-end Deep Symbol Generation and Rule Learning from Unsupervised Continuous Robot Interaction for Planning
 
-[![Build Status](https://travis-ci.com/alper111/DeepSym.svg?branch=master)](https://travis-ci.com/alper111/DeepSym) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b556c5f525564100b333987d101d5636)](https://app.codacy.com/manual/alper111/DeepSym?utm_source=github.com&utm_medium=referral&utm_content=alper111/DeepSym&utm_campaign=Badge_Grade_Dashboard)
+[![Build Status](https://travis-ci.com/alper111/DeepSym.svg?token=9aq3rfWjkgZpWdhKz8ww&branch=master)](https://travis-ci.com/alper111/DeepSym) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b556c5f525564100b333987d101d5636)](https://app.codacy.com/manual/alper111/DeepSym?utm_source=github.com&utm_medium=referral&utm_content=alper111/DeepSym&utm_campaign=Badge_Grade_Dashboard)
 
 ## Install python3 requirements
 ```bash
