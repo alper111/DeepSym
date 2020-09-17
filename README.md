@@ -1,4 +1,4 @@
-# Learning Effect Regulated Object Categories with Deep Networks
+# End-to-end Deep Symbol Generation and Rule Learning from Unsupervised Continuous Robot Interaction for Planning
 
 [![Build Status](https://travis-ci.com/alper111/DeepSym.svg?branch=master)](https://travis-ci.com/alper111/DeepSym) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b556c5f525564100b333987d101d5636)](https://app.codacy.com/manual/alper111/DeepSym?utm_source=github.com&utm_medium=referral&utm_content=alper111/DeepSym&utm_campaign=Badge_Grade_Dashboard)
 
@@ -47,31 +47,45 @@ For more information about mdpsim, see: <https://github.com/hlsyounes/mdpsim>
 
 ## Example options file (`opts.yaml`)
 ```yaml
-learning_rate: 0.001
-batch_size1: 30
-batch_size2: 50
-epoch1: 2000
-epoch2: 200
-device: cuda:0
-hidden_dim: 128
-code1_dim: 2
-code2_dim: 1
-depth: 2
-cnn: true
-filters1: [1, 32, 64, 128, 256]
-filters2: [2, 32, 64, 128, 256]
 batch_norm: true
+cnn: true
+epoch1: 300
+batch_size1: 128
+learning_rate1: 0.00005
+code1_dim: 2
+filters1: [1, 32, 64, 128, 256]
+epoch2: 300
+batch_size2: 128
+learning_rate2: 0.00005
+code2_dim: 1
+filters2: [2, 32, 64, 128, 256]
+hidden_dim: 128
+depth: 2
 size: 42
+device: cuda
 load: null
-save: out/savefolder
+save: save/stable1
 ```
 
 ## Training
 
+1. Train the encoder-decoder network
+2. Cluster the effect space and name them. Two of the centroids should be named as `inserted` and `stacked`. This is for auxiliary predicates.
+3. Save single and paired object categories.
+4. Train a decision tree and convert it to PPDDL.
+
+The following command executes these four steps:
+
 `./train_run.sh opts.yaml`
+
+A pre-trained model is in `save/stable1`. So, you can skip training steps if you like.
 
 ## Planning
 
+1. Start roscore
+2. Open the scene in `simtools/rosscene_first.ttt` with CoppeliaSim
+3. Randomly generate problems and solve for the goal with `make_plan.sh`
+
 __Examples__:  
-`./make_plan.sh opts.yaml example_2.txt "(H3) (S0)"`  
-`./make_plan.sh opts.yaml example_2.txt "(H0) (S2)"`
+`./make_plan.sh opts.yaml "(H3) (S4)"`  
+`./make_plan.sh opts.yaml "(H4) (S4)"`
