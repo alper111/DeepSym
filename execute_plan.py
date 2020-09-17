@@ -8,7 +8,7 @@ parser.add_argument("-uri", help="master uri. optional", type=str, default="http
 args = parser.parse_args()
 
 
-node = RosNode("execute_plan", args.uri, wait_time=1.5)
+node = RosNode("execute_plan", args.uri, wait_time=2.5)
 
 file = open(args.p, "r")
 lines = file.readlines()
