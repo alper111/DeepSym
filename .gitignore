@@ -129,13 +129,13 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# output files
+# output files
 out/*
 
-# data files
+# data files
 data/*
 
-# save files
+# save files
 save/*
 
 # vscode settings
@@ -147,3 +147,4 @@ last_id
 
 .DS_Store
 setup.cfg
+*.sublime-workspace
